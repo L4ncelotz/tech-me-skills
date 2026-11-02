@@ -27,11 +27,11 @@ Help the user make a justified, practical architecture decision, **not** simply 
 
 ### 2. Discover: short adaptive interview
 
-- Ask **one focused, high-impact question per turn by default**, with a concise reason when its importance isn't obvious. Combine closely related questions only when doing so reduces friction.
+- Ask **one focused, high-impact question per turn**, with a concise reason when its importance isn't obvious. A turn covers one decision only: if two unknowns are independent, ask them in separate turns instead of bundling them.
 - Before asking, check: **Could this answer materially change the architecture, stack, feasibility, cost, or risk?** If not, skip it.
 - Don't ask for facts already supplied, visible in inspected sources, or reasonably defaultable. Do not mechanically cover all categories or impose a fixed question quota.
 - Probe as relevant: target users and peak concurrent activity (not just registered users), critical workflows and data shape, workload/latency/availability, deployment and compliance constraints, team/operations, budget, integrations, growth assumptions, and migration cost. See [discovery guide](references/discovery.md) as needed.
-- If a user doesn't know, briefly explain the concept, adopt a **reasonable provisional default** where safe, mark it clearly, and continue. Do not repeatedly interrogate the user. Do not invent exact user counts, latency targets, budgets, SLAs, or security requirements.
+- If a user doesn't know, briefly explain the concept, adopt a **reasonable provisional default** where safe, mark it clearly, state an observable condition that would reopen it, and continue. Do not repeatedly interrogate the user. Do not invent exact user counts, latency targets, budgets, SLAs, or security requirements.
 - If stated requirements conflict or seem infeasible, challenge the premise respectfully; identify what evidence or compromise would resolve it. Do not silently relax a hard constraint.
 - Support “skip”, “enough”, “recommend now”, and equivalent user requests. A user can revise any earlier answer at any time.
 - **Stop asking** when remaining unknowns are unlikely to change the recommendation materially or can be covered by visible assumptions. If a critical unknown prevents a safe commitment, provide a conditional recommendation and a verification step rather than indefinitely blocking progress.
@@ -41,10 +41,11 @@ Help the user make a justified, practical architecture decision, **not** simply 
 - Set out **hard constraints**, **primary priorities**, and **secondary preferences**. Exclude options that violate actual hard constraints; note if all options fail.
 - Identify 2–3 genuinely viable alternatives when comparison adds value; a clear single option is acceptable if there is no useful runner-up. Compare complete approaches when needed (architecture + stack + deployment), not unrelated language buzzwords.
 - Weigh fitness for this workload, simplicity, maintenance burden, ecosystem, team expertise/learning curve, operational cost, security/reliability, migration cost, and evolutionary flexibility. Popularity is evidence of ecosystem maturity **only**, not a substitute for suitability.
-- Counter-check historical, familiarity, and hype bias: **Would this option still be competitive if the user had never mentioned it?** Consider at least one credible alternative when doing so is material. Do not artificially penalize familiar technologies.
+- Counter-check historical, familiarity, and hype bias with one canonical check: **Would this still be the right choice if the user had a different technical background, while holding actual team, migration, and operating costs fixed?** Consider at least one credible alternative when doing so is material. Do not artificially penalize familiar technologies.
 - Prefer a **simple viable design** with sensible boundaries and a migration path. Avoid speculative microservices, orchestration, queues, caching, or cloud components. Conversely, do not force a monolith when actual constraints justify another architecture.
 - Verify risk-sensitive or fast-changing claims (version compatibility, security support, hosting limits, pricing, material performance claims) against primary sources if research tools exist. Scope benchmarks to measured versions, configuration, and workloads. See [evidence and evaluation](references/evaluation.md).
 - If verification is unavailable, distinguish established general principles from **unverified/current-sensitive claims**. Never fabricate sources, benchmark numbers, prices, or tests. Avoid arbitrary numeric scoring or confidence percentages.
+- Every number you introduce — memory, latency, throughput, cost, user counts, and similar figures — that nobody measured in this conversation and that you have not verified against a source must be labeled **estimate — not measured** (or the user's language equivalent) with its basis, or be replaced by a relative/qualitative comparison. Numbers supplied by the user are unaffected.
 
 ### 4. Challenge: lightweight quality gate
 

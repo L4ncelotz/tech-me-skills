@@ -8,11 +8,13 @@
 
 **Assumption / verification:** <most important unknown and how to check it>.
 
+**Revisit when:** <observable trigger — a metric threshold, growth event, or constraint change — that would reopen this decision>.
+
 ## Adaptive technical decision report (complex decision)
 
 1. **Recommendation first:** proposed architecture and stack; what it solves; whether the choice is definitive or conditional.
 2. **Decision context:** confirmed facts and hard constraints; primary priorities.
-3. **Assumptions:** explicit defaults; avoid fabricated quantities and obligations.
+3. **Assumptions:** explicit provisional defaults, each with its observable revisit condition; avoid fabricated quantities and obligations.
 4. **Alternatives:** 2–3 credible options with constraint fit, strengths, trade-offs and when to prefer them.
 5. **Rationale:** why the recommendation wins for *these* requirements; where historical/tool familiarity factored in.
 6. **Risks and validation:** important unresolved issues; feasible checks or measurements; distinguish examined from unexamined.

@@ -46,11 +46,23 @@ This creates `dist/tech-me-0.1.0.zip` containing only committed files and assert
 Do not package releases with a hand-rolled `git archive` command. `pack_release.py` is the single supported release path: a manual `git archive` skips the version/tag/commit verification and the forbidden-artifact scan, so an archive built that way must never be distributed.
 
 ### 4. Create GitHub Release
-Attach the generated distribution archive to the GitHub Release:
+Release notes must cover only the released version's own section, not the entire `CHANGELOG.md` history. Extract that section with `awk` (use Git Bash on Windows), then create the release. The title and flags intentionally mark this as a GitHub **pre-release**, matching the `0.1.0` Limitations entry in `CHANGELOG.md` (cross-agent behavior and comparative quality are not yet verified):
+
 ```bash
+mkdir -p dist
+awk '/^## \[0\.1\.0\]/{f=1; next} /^## /{f=0} f' CHANGELOG.md > dist/release-notes-0.1.0.md
+
 gh release create v0.1.0 dist/tech-me-0.1.0.zip \
-  --title "v0.1.0 - Initial Evaluated Release" \
-  --notes-file CHANGELOG.md
+  --prerelease \
+  --title "v0.1.0 - Initial Pre-release" \
+  --notes-file dist/release-notes-0.1.0.md
+```
+
+Before uploading, sanity-check the notes: the file should start with a blank line followed by `### Added`, end with the Limitations entries, and contain no `## ` headings (`head -n 3` / `tail -n 3`). `dist/` is git-ignored, so writing the notes file does not dirty the working tree for `pack_release.py`.
+
+To reuse the extraction for another version, avoid regex metacharacters entirely:
+```bash
+awk -v v="0.1.1" 'index($0, "## [" v "]") == 1 {f=1; next} /^## /{f=0} f' CHANGELOG.md > dist/release-notes-0.1.1.md
 ```
 
 ---

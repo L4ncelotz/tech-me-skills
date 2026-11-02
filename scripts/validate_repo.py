@@ -12,6 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_NAME = "tech-me"
+SCENARIOS_PATH = "evals/scenarios.json"
+RESULTS_PATH = "evals/RESULTS.md"
 CATEGORIES = {
     "discovery", "stopping", "bias", "unknowns", "feasibility", "existing-project",
     "overengineering", "evolution", "evidence", "risk", "communication",
@@ -20,6 +22,9 @@ CATEGORIES = {
 ALLOWED_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_RE = re.compile(r"\]\(([^)]+)\)")
+SUMMARY_HEADING = "### Aggregate Score Summary"
+COVERAGE_CLAIM_RE = re.compile(r"\*\*Scenario coverage:\*\*\s+(\d+)\s+of\s+(\d+)\s+fixture scenarios")
+BACKTICK_RE = re.compile(r"`([^`\n]+)`")
 
 
 def parse_simple_frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
@@ -135,12 +140,55 @@ def validate_scenarios(path: Path) -> list[str]:
     return errors
 
 
+def validate_results_claims(results_path: Path, scenario_ids: set[str]) -> list[str]:
+    """Keep the RESULTS.md scenario-coverage claim in sync with scenarios.json."""
+    errors: list[str] = []
+    if not results_path.is_file():
+        return [f"Missing evaluation results: {results_path}"]
+    text = results_path.read_text(encoding="utf-8")
+    match = COVERAGE_CLAIM_RE.search(text)
+    if match is None:
+        return [
+            "RESULTS.md must state scenario coverage as '**Scenario coverage:** "
+            "N of M fixture scenarios'."
+        ]
+    sampled, claimed_total = (int(part) for part in match.groups())
+    if claimed_total != len(scenario_ids):
+        errors.append(
+            f"RESULTS.md claims {claimed_total} fixture scenarios, but "
+            f"{SCENARIOS_PATH} defines {len(scenario_ids)}."
+        )
+    fragment = text.split(SUMMARY_HEADING, 1)
+    if len(fragment) == 1:
+        errors.append(f"RESULTS.md is missing a '{SUMMARY_HEADING}' table.")
+        return errors
+    summary = fragment[1].split("\n---", 1)[0]
+    referenced = {token for token in BACKTICK_RE.findall(summary) if token in scenario_ids}
+    if len(referenced) != sampled:
+        errors.append(
+            f"RESULTS.md claims {sampled} sampled scenarios, but its summary table "
+            f"references {len(referenced)} known scenario ID(s)."
+        )
+    return errors
+
+
 def validate_repo(root: Path) -> list[str]:
     errors: list[str] = []
     errors.extend(validate_skill(root / "skills" / SKILL_NAME))
-    errors.extend(validate_scenarios(root / "evals" / "scenarios.json"))
+    scenarios_file = root / SCENARIOS_PATH
+    scenario_errors = validate_scenarios(scenarios_file)
+    errors.extend(scenario_errors)
+    if not scenario_errors:
+        data = json.loads(scenarios_file.read_text(encoding="utf-8"))
+        ids = {
+            item["id"]
+            for item in data.get("scenarios", [])
+            if isinstance(item, dict) and isinstance(item.get("id"), str)
+        }
+        errors.extend(validate_results_claims(root / RESULTS_PATH, ids))
     for filename in (
-        "README.md", "LICENSE", "CONTRIBUTING.md", "CHANGELOG.md", "evals/RUBRIC.md", "evals/RUNBOOK.md"
+        "README.md", "LICENSE", "CONTRIBUTING.md", "CHANGELOG.md", RESULTS_PATH,
+        "evals/RUBRIC.md", "evals/RUNBOOK.md"
     ):
         if not (root / filename).is_file():
             errors.append(f"Missing repository document: {filename}")

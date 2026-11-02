@@ -4,6 +4,19 @@ All notable changes to this project should be documented here.
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/make_release_notes.py`: stdlib-only extractor that writes a version's release notes with explicit UTF-8 and fails closed on missing sections, malformed `### ` headings, stray `## ` headings, BOM and NUL bytes; covered by unit tests.
+
+### Changed
+
+- `scripts/validate_repo.py` now checks that the scenario-coverage claim in `evals/RESULTS.md` matches `evals/scenarios.json` (total count and sampled rows), and requires `evals/RESULTS.md` to exist.
+
+### Fixed
+
+- Release-notes generation in `PUBLISHING.md` no longer relies on shell redirection/`awk`, which under Windows PowerShell could silently write UTF-16 (occurred in the v0.1.0 release); the documented workflow uses `scripts/make_release_notes.py` with no redirection.
+- `evals/RESULTS.md` scenario coverage corrected to "3 of 14 fixture scenarios", matching `evals/scenarios.json`, and marked as a historical v0.1.0 run via a top-of-file note.
+
 ## [0.1.0] - 2026-10-29
 
 ### Added

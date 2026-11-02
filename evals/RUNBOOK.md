@@ -37,6 +37,7 @@ Before tagging a release:
 - Run `python -m unittest discover -s tests -v`.
 - Optionally run `skills-ref validate ./skills/tech-me` if upstream CLI is installed.
 - Perform at least one baseline/skill-enabled review for the scenario categories affected by the change.
+- Keep the "**Scenario coverage:** N of M fixture scenarios" line in `RESULTS.md` in sync with `evals/scenarios.json`; `scripts/validate_repo.py` rejects drifts in both directions.
 - Publish honest observations, regressions and limitations, not a fabricated pass percentage.
 
 **Note:** The local Python tests validate files and fixtures. They do not run an LLM, assess agent reasoning, or certify Claude Code/Codex/Cursor/OpenCode behavior.

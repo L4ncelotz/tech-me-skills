@@ -11,6 +11,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+from make_release_notes import check_bom_and_nul, extract_release_notes, validate_notes_text, write_release_notes  # noqa: E402
 from pack_release import assert_clean_git_tree, is_forbidden, pack_release, verify_git_ref  # noqa: E402
 from run_evals import filter_scenarios, load_scenarios, load_skill_prompt  # noqa: E402
 
@@ -266,6 +267,72 @@ class ScriptTests(unittest.TestCase):
             self.assertIn("Release tag 'v0.1.0' not found", str(ctx.exception))
             self.assertIn("a branch named 'v0.1.0' exists", str(ctx.exception))
             self.assertFalse((out_dir / "tech-me-0.1.0.zip").exists())
+CHANGELOG_FIXTURE = """# Changelog
+
+## [Unreleased]
+
+## [0.1.0] - 2026-10-29
+
+### Added
+
+- Something new.
+
+### Limitations
+
+- Not yet verified.
+
+## [0.0.9] - 2026-10-01
+
+### Added
+
+- Something older.
+"""
+
+
+class ReleaseNotesTests(unittest.TestCase):
+    def test_extracts_only_the_requested_section(self):
+        notes = extract_release_notes(CHANGELOG_FIXTURE, "0.1.0")
+        self.assertTrue(notes.startswith("### Added\n"))
+        self.assertIn("### Limitations", notes)
+        self.assertIn("Not yet verified.", notes)
+        self.assertNotIn("Something older", notes)
+        self.assertNotIn("[Unreleased]", notes)
+
+    def test_partial_version_string_never_matches(self):
+        with self.assertRaises(RuntimeError):
+            extract_release_notes(CHANGELOG_FIXTURE, "0.1")
+        with self.assertRaises(RuntimeError):
+            extract_release_notes(CHANGELOG_FIXTURE, "0.1.1")
+
+    def test_missing_version_section_fails_closed(self):
+        with self.assertRaises(RuntimeError):
+            extract_release_notes(CHANGELOG_FIXTURE, "9.9.9")
+
+    def test_section_without_subsection_heading_fails_closed(self):
+        malformed = "# Changelog\n\n## [0.1.0] - 2026-10-29\nplain body without headings\n"
+        with self.assertRaises(RuntimeError):
+            extract_release_notes(malformed, "0.1.0")
+
+    def test_stray_heading_body_fails_closed(self):
+        with self.assertRaises(RuntimeError):
+            validate_notes_text("0.1.0", "### Added\n\n## Stray heading\n")
+        with self.assertRaises(RuntimeError):
+            validate_notes_text("0.1.0", "### Added\n\nTop\n## Another section\n")
+
+    def test_written_notes_are_utf8_without_bom_or_nul(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_path = Path(tmp_dir) / "notes.md"
+            data = write_release_notes("0.1.0", CHANGELOG_FIXTURE, out_path)
+            self.assertEqual(out_path.read_bytes(), data)
+            self.assertEqual(data[:5], b"### A")
+            self.assertNotIn(b"\x00", data)
+            self.assertIn("Something new", out_path.read_text(encoding="utf-8"))
+
+    def test_bom_and_nul_detection_fails_closed(self):
+        with self.assertRaises(RuntimeError):
+            check_bom_and_nul("notes.md", b"\xef\xbb\xbf### Added")
+        with self.assertRaises(RuntimeError):
+            check_bom_and_nul("notes.md", b"### Added\x00")
 
 
 if __name__ == "__main__":

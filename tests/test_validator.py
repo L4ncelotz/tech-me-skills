@@ -7,12 +7,55 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from validate_repo import ROOT, validate_repo, validate_scenarios, validate_skill  # noqa: E402
+from validate_repo import ROOT, SUMMARY_HEADING, validate_repo, validate_results_claims, validate_scenarios, validate_skill  # noqa: E402
 
 
 class ValidationTests(unittest.TestCase):
     def test_real_repo_passes(self):
         self.assertEqual(validate_repo(ROOT), [])
+
+    def test_rejects_results_coverage_total_drift(self):
+        fixture = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
+        ids = {s["id"] for s in fixture["scenarios"]}
+        with tempfile.TemporaryDirectory() as directory:
+            results = Path(directory) / "RESULTS.md"
+            results.write_text(
+                "- **Scenario coverage:** 3 of 99 fixture scenarios; only some categories exercised.\n\n"
+                f"{SUMMARY_HEADING}\n\n| Scenario ID |\n| :--- |\n| `unknown-scale-defaults` |\n\n---\n",
+                encoding="utf-8",
+            )
+            errors = validate_results_claims(results, ids)
+            self.assertTrue(any("99 fixture scenarios" in err for err in errors))
+
+    def test_rejects_results_sampled_count_mismatch(self):
+        fixture = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
+        ids = {s["id"] for s in fixture["scenarios"]}
+        with tempfile.TemporaryDirectory() as directory:
+            results = Path(directory) / "RESULTS.md"
+            results.write_text(
+                "- **Scenario coverage:** 3 of "
+                f"{len(ids)} fixture scenarios; only some categories exercised.\n\n"
+                f"{SUMMARY_HEADING}\n\n| Scenario ID |\n| :--- |\n| `unknown-scale-defaults` |\n\n---\n",
+                encoding="utf-8",
+            )
+            errors = validate_results_claims(results, ids)
+            self.assertTrue(any("references 1 known scenario ID" in err for err in errors))
+
+    def test_accepts_results_claims_of_real_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            results = (ROOT / "evals/RESULTS.md").read_text(encoding="utf-8")
+            copy = Path(directory) / "RESULTS.md"
+            copy.write_text(results, encoding="utf-8")
+            fixture = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
+            ids = {s["id"] for s in fixture["scenarios"]}
+            self.assertEqual(validate_results_claims(copy, ids), [])
+
+    def test_rejects_missing_coverage_claim(self):
+        with tempfile.TemporaryDirectory() as directory:
+            results = Path(directory) / "RESULTS.md"
+            results.write_text("# Report without the claim\n", encoding="utf-8")
+            errors = validate_results_claims(results, {"a-scenario"})
+            self.assertTrue(any("N of M fixture scenarios" in err for err in errors))
 
     def test_rejects_wrong_skill_directory_name(self):
         with tempfile.TemporaryDirectory() as directory:

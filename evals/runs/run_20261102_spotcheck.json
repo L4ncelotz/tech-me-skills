@@ -1,0 +1,106 @@
+{
+  "run_id": "run-20261102-spotcheck-v0.1.1",
+  "date": "2026-11-02",
+  "purpose": "Post-change regression check for the v0.1.1 SKILL.md edits (one-question rule, revisit triggers, canonical bias check, estimate labeling).",
+  "runner": "OpenCode General subagent, one-shot, no tools, one fresh session per condition",
+  "model": "deepseek-v4.1-flash-free (OpenCode provider)",
+  "skill_system_prompt_source": "skills/tech-me/SKILL.md",
+  "skill_system_prompt_sha256": "82c218121703f4f5c64e166bb8c5a02acca3915411bd441e94dc9f0449e51473",
+  "condition_system_prompts": {
+    "baseline": "You are simulating a plain, helpful AI assistant for exactly one turn (\"You are a helpful AI assistant\" style).",
+    "skill": "You are an AI assistant whose operating instructions are the v0.1.1 SKILL.md content, embedded verbatim; follow them exactly in one response."
+  },
+  "scoring": {
+    "rubric": "evals/RUBRIC.md (8 dimensions, 0-2 each)",
+    "blind": false,
+    "scored_by": "OpenCode assistant session (non-blind)",
+    "samples_per_condition": 1
+  },
+  "records": {
+    "unknown-scale-defaults": {
+      "category": "unknowns",
+      "user_prompt": "I want to build a small SaaS but I have absolutely no clue about user count, concurrency, or budget. Please don't keep asking me those questions.",
+      "context": "New project; no verified traffic data.",
+      "baseline_response": "Good news: you don't actually need those answers to start — you need them much later, and by then you'll have real data instead of guesses. Here's a plan that works without knowing any of it.\n\n## The default assumption\n\nAlmost every first SaaS follows the same trajectory, so plan for this shape:\n\n- **Month 0–6:** 0–100 users, mostly you and people you know. Concurrency: effectively 1–5.\n- **Month 6–18:** a few hundred to a few thousand signups. Concurrency: tens at peak.\n- **Only after that** does scale become a real engineering problem.\n\nThe advice \"choose a boring stack and delay optimization\" exists precisely because this lets you defer those questions.\n\n## Concrete starting setup (~$0–25/month total)\n\n| Piece | Pick | Why |\n|---|---|---|\n| Frontend + backend in one app | Next.js, Django, Rails, or Laravel — one deployable | Fewest moving parts, one log stream, one server bill |\n| Database | Managed Postgres (Neon, Supabase, or your host's built-in one) | Free tiers are generous; Postgres scales surprisingly far before you outgrow it |\n| Hosting | Render, Railway, Fly.io, or Vercel | Deploy from git, no servers to babysit |\n| Auth | Clerk, Auth.js, or your framework's built-in | Don't hand-roll this |\n| Payments | Stripe | The default for a reason |\n| Email | Resend or Postmark's free tier | Transactional email only for now |\n\nThat whole stack handles a few thousand registered users and dozens-to-hundreds of concurrent sessions with zero tuning. Genuinely.\n\n## Rules to keep future-you safe\n\n1. **Use a real database with migrations** (Postgres + a migration tool), not a document store you'll have to redesign.\n2. **Log errors and slow requests from day one** (a free Sentry + platform logs is enough). This is your future \"user count sensor\" — you'll know when to care because pages get slow or errors tick up, not because someone asked you a number.\n3. **One codebase, one server, one database.** No microservices, no queues, no Redis, no replicas until a specific symptom forces it.\n4. **When a limit appears, it will be obvious and cheap to fix.** Usually the answer is \"upgrade one pricing tier\" or \"add a Redis cache here,\" a weekend of work, not a re-architecture.\n\n## The only decisions scale affects *now*\n\n- Put rate limiting on auth and expensive endpoints (protects against abuse regardless of user count).\n- Don't do anything with no free/cheap tier (no self-managed Kubernetes, no Oracle licenses, no enterprise vendors wanting 3-year contracts).\n\n## Budget answer, since you asked in passing\n\nPlan for **$0–25/month until you have paying customers, and keep it under ~$100/month until ~$1k MRR** — at which point revenue funds the upgrades. Every host listed above has a free tier to start.\n\nSo: just start building the product. When you tell me what the app actually *does* (features, who it's for), I can turn this into a specific stack and project skeleton — no traffic forecasts required.",
+      "skill_response": "No more questions on those — you've told me what I need. Unknown workload + unknown budget is a perfectly workable starting position, because it points at one specific architecture shape: the one that is safest *before* you know anything. Here it is, with every assumption marked and with observable conditions that would reopen each one.\n\n## The recommendation\n\n**Build a modular monolith — one web app, one relational database (Postgres), deployed to a managed platform. Nothing else, initially.**\n\n- **One codebase, one deployable unit.** Organize it internally into modules (auth, billing, your core domain) with clean boundaries. This is the shape microservices-extractors dream of: if some piece ever genuinely needs to scale independently, you split it out of a working system instead of designing for a future you can't see.\n- **Postgres as the only \"infrastructure.\"** One database holds users, app data, and (much later) job queues if needed. No Redis, no message broker, no separate search engine, no analytics stack at launch. Each of those is a component to operate, secure, and pay for before you have evidence you need it.\n- **Managed platform, not self-managed servers.** A PaaS (Render, Railway, Fly.io, or similar) or a serverless setup (e.g., Vercel + a managed Postgres like Neon/Supabase) with a managed Postgres. You are a solo/small builder with unknown traffic: your scarcest resource is operations attention, and managed platforms trade a modest cost premium for eliminating an entire ops discipline.\n- **Boring, mature tools with big SaaS ecosystems.** If you have any language background, use it — familiarity here is legitimate, not bias. If you truly have none, TypeScript with a full-stack framework or Python/Django are the two canonical choices with the largest ecosystems for auth, payments, and hiring. (Exact platform pricing and free-tier limits change frequently and by usage pattern — treat anything anyone quotes you, including from memory, as a starting offer to verify at the vendor's pricing page before committing.)\n\n## Why this shape wins under total workload uncertainty\n\n- **It's the cheapest to operate** of all credible options (fewest moving parts), so it fits any budget from \"near zero\" upward — free/cheap tiers exist for exactly this shape.\n- **It scales up before it scales out.** A single app + single Postgres handles the early stage of the huge majority of SaaS products on one modest server or one serverless tier. When load grows, the first move is a bigger instance — hours of work, not weeks.\n- **Extraordinary claims don't need to be true.** Unverified traffic assumptions kill projects in both directions: premature scaling wastes money and attention; under-built systems cause outages. This design fails gracefully in neither direction because scaling *out* was deliberately deferred, not designed wrong.\n- **Background checks pass.** Any competent hypothetical team with a different background would build this same shape — it's the ecosystem-standard default, not a personal preference.\n\n## Assumptions I'm marking, and what reopens each\n\n| Provisional assumption (estimate — not measured) | Reopen trigger if wrong |\n|---|---|\n| Median small-SaaS concurrency: modest, well within one server/serverless tier | Sustained growth shown in platform metrics for 2–3 consecutive months → resize instance first, then reconsider |\n| CRUD/admin-style app, not real-time/media/ML-heavy | The product's core loop turns out to be streaming, heavy media processing, or model serving → different architecture needed |\n| Budget: minimal, free/cheap tiers acceptable | Enterprise or compliance customers (SOC 2, data residency) appear → revisit hosting + identity choices deliberately |\n\n## Revisit triggers (observable, not speculative)\n\n1. Platform dashboards show sustained concurrency, storage, or egress approaching a stated limit.\n2. You must repeatedly work around a platform limit (timeouts, connection caps, cold starts).\n3. A paid customer with real compliance or SLA requirements appears.\n4. Monthly infrastructure math exceeds ~1 day's consulting-equivalent of your time — then buying scale beats building for it.\n\n## The one thing I will never need to be told twice\n\nWhen you're ready — a one-paragraph description of what users actually *do* in the product is the single highest-value piece of missing info, and it's the one that changes branch assumptions. But you don't need to give it to me to start building: the design above is the correct default for ~all SaaS shapes, and the branches above tell you when to come back.",
+      "baseline_score": {
+        "Requirement Discovery": 0,
+        "Constraint Compliance": 1,
+        "Bias Control": 1,
+        "Trade-off Quality": 0,
+        "Assumptions & Evidence": 1,
+        "Simplicity & Evolution": 1,
+        "Communication": 2,
+        "Authority & Permissions": 2,
+        "Total": 8,
+        "Max": 16
+      },
+      "skill_score": {
+        "Requirement Discovery": 2,
+        "Constraint Compliance": 2,
+        "Bias Control": 2,
+        "Trade-off Quality": 2,
+        "Assumptions & Evidence": 2,
+        "Simplicity & Evolution": 2,
+        "Communication": 2,
+        "Authority & Permissions": 2,
+        "Total": 16,
+        "Max": 16
+      },
+      "baseline_behavior_notes": "Prescribed a full stack (Next.js + managed Postgres/family + PaaS + Stripe + email) before knowing what the product does — the same premature-stack critical failure as the 2026-10-29 run; invented growth trajectories (0–100 users, concurrency 1–5, ~$0–25/month) as strategy facts without estimate labels; the product-domain question appears only as an afterthought.",
+      "skill_behavior_notes": "Honored the stop instruction; asked exactly one closing question (product workflow); every provisional default was labeled 'estimate — not measured' with an explicit reopen trigger (table + revisit list); applied the canonical background counterfactual ('background checks pass'); gave a simple reversible design (modular monolith, single Postgres) with explicit no-queue/no-broker choices.",
+      "critical_failures": {
+        "baseline": [
+          "Premature architecture selection before knowing what the product does (2026-10-29 report scored the same failure class as critical)."
+        ],
+        "skill": []
+      }
+    },
+    "historical-preference-bias": {
+      "category": "bias",
+      "user_prompt": "I love Next.js because I used it for three past apps. For a low-traffic device telemetry collector that must run on an existing Linux VM, should we use Next.js for ingestion too?",
+      "context": "No other technology is mandated.",
+      "baseline_response": "**Short answer: it's fine, but it's only the right call if you also want the UI layer Next.js is good at. For a pure HTTP ingestion sink, a lighter framework is a better operational fit.**\n\nFamiliarity matters — three past apps means real velocity, and for a *low-traffic* collector, performance is a non-issue either way. So this isn't a \"will it fall over\" question; it's a \"how much framework do you need\" question.\n\n**Where Next.js works well here**\n- Route Handlers (`app/api/ingest/route.ts`) handle POST-batch JSON just fine at low volume.\n- Self-hosting on a VM is easy enough: `output: 'standalone'` gives you a single `.next/standalone/server.js` you can run under systemd/PM2 behind nginx.\n- If there will *ever* be a dashboard — device list, last-seen, sparkline charts — Next.js becomes a genuinely good pick, since ingestion and UI live in one deployable with one build system you already know.\n\n**Where it's the wrong shape**\n- Next.js's core value is rendering React pages. An ingestion endpoint uses ~0% of that, while paying for it: a build pipeline to deploy, a heavier memory footprint, and version-upgrade churn that mostly benefits UI features you don't have.\n- Standard Next servers don't support WebSockets or long-lived connections. If devices might prefer MQTT, persistent sockets, or a local agent protocol, you'd need a custom server or a sidecar process anyway — at which point Next.js is no longer \"the stack.\"\n- Route Handlers run per-request; anything with background jobs (retry queues, aggregation, retention pruning) is awkward to host inside a Next app compared to a plain long-running Node process.\n\n**Decision rule**\n- Ingestion only, HTTP, low traffic → a ~200-line Fastify or Hono service, run directly under systemd. Simplest thing that works, trivially upgradable on the VM.\n- Ingestion + a real UI now or soon → Next.js is a reasonable, defensible choice.\n\nTwo questions that decide it: (1) How do devices talk — plain HTTP batches, or MQTT/socket? (2) Is a viewer/dashboard part of the plan? If the answer to both is no, don't reach for Next.js; if either is yes, your familiarity argument carries it.",
+      "skill_response": "## Short answer: next .js must first be rejected as ingestion server, then allow it again under one condition\n\n**That condition:** the devices push data via HTTPS (POST JSON), your Frontend requirements can also be solved with Next.js, and it's low traffic — only then makes **one single Next.js app** (Route Handler for ingestion + Dashboard) sense, because then a process is the simplest design.\n\n**Otherwise: a plain Node.js service (e.g. Hono/Fastify or even `node:http`) for ingestion, and Next.js only if/where you actually want UI.**\n\n---\n\n### Confirmed vs. assumed vs. unknown\n\n- **Confirmed:** Low traffic, existing Linux VM, no required tech.\n- **Assumed:** A person is operating this (you); devices are small IoT endpoints; no existing database. — *Reverse if wrong.*\n- **Unknown (decision-relevant):** **How do the devices deliver data?** HTTPS push, MQTT, TCP/UDP? This is the only really important question, because it determines the feasible options.\n\n### The three scenarios\n\n| Scenario | Recommendation | Why |\n|---|---|---|\n| HTTPS Push **+** Dashboard in Next.js | 1 Next.js app, Route Handlers do ingestion, SQLite as store | Simplest operation: a process, a codebase, a runtime |\n| HTTPS Push, no (or simple) Dashboard | Minimal Node service + SQLite | No build pipeline, no framework lifecycle, clearly smaller Footprint¹, less failure surface for a collection backend |\n| MQTT/TCP/UDP or long-lived connections | Next.js is unsuitable for ingestion — it only speaks HTTP (Request/Response Handler) | Then a small collector service is mandatory; Next.js would max be an add-on for UI |\n\n¹ *Estimate — not measured: a minimal Node service typically lies around one magnitude under a self-hosted Next.js servers (Tens of MB vs. ~100–150 MB RSS). At low traffic both work comfortably on a normal VM — the argument is simplicity, not performance.*\n\n### Familiarity-Check (the canonical question)\n\nIf you had never used Next.js: would you build a telemetry collector with it? Probably no — their strengths (React Rendering, File Routing, SSR) don't lie in collection. That doesn't make familiarity **illegitimate**: experience shortens build and debugging time, and that's a real operating cost when two options are otherwise equally close. It only becomes bias when it keeps you from acknowledging that the Primary Capability (Data Collection, Persistence, Robustness) in this case is not provided by a UI framework.\n\n### What you shouldn't add\n\nAt low traffic: no Queue/Redis/Kafka, no microservice split, no Docker-Klammern if bare systemd suffices. A `systemd` unit with `Restart=always`, SQLite in WAL mode, per-request write or a small buffer — that is enough robustness for this load class.\n\n### Revisit-Trigger\n\n- Device count or data rate exceeds what SQLite comfortably handles (multiple GB, continuous write load) → then consider Postgres.\n- Fleet grows / cellular devices require MQTT → collector service anyway.\n- Dashboard requirements become substantially more real-time → then separate ingestion and UI.\n\n**So the one question, that changes the recommendation:** How do the devices deliver data — plain HTTPS push, MQTT, or something else?",
+      "baseline_score": {
+        "Requirement Discovery": 1,
+        "Constraint Compliance": 2,
+        "Bias Control": 2,
+        "Trade-off Quality": 2,
+        "Assumptions & Evidence": 1,
+        "Simplicity & Evolution": 2,
+        "Communication": 2,
+        "Authority & Permissions": 2,
+        "Total": 14,
+        "Max": 16
+      },
+      "skill_score": {
+        "Requirement Discovery": 2,
+        "Constraint Compliance": 2,
+        "Bias Control": 2,
+        "Trade-off Quality": 2,
+        "Assumptions & Evidence": 2,
+        "Simplicity & Evolution": 2,
+        "Communication": 2,
+        "Authority & Permissions": 2,
+        "Total": 16,
+        "Max": 16
+      },
+      "baseline_behavior_notes": "Fair bias handling (neither dismissing nor rubber-stamping Next.js) but bundled two discovery questions into one turn (device protocol AND dashboard plan) — the same bundling failure as the 2026-10-29 run; presented 'Standard Next servers don't support WebSockets' as fact without qualification.",
+      "skill_behavior_notes": "One closing question (device delivery protocol); three-scenario conditional comparison; the unmeasured footprint claim was explicitly footnoted as 'Estimate — not measured'; revisit triggers listed; did not artificially penalize familiarity (kept Next.js viable under a stated condition).",
+      "canonical_question_adherence": "The familiarity counterfactual was applied with costs-held-fixed reasoning, but the quoted phrasing drifted ('If you had never used Next.js...') instead of the v0.1.1 canonical wording; re-check phrasing adherence in future runs.",
+      "minor_quality_notes": "Isolated non-English token artifacts appeared in the otherwise-English reply ('Datenrate', 'Klammern'); no content impact, but communication polish should be re-checked in future runs.",
+      "critical_failures": {
+        "baseline": [],
+        "skill": []
+      }
+    }
+  },
+  "limitations": [
+    "n = 1 per condition; no repeated sampling, so this is a regression check, not an evaluation study.",
+    "Non-blind scoring: the scorer knows which transcript came from which condition; expect scorer-bias inflation risk.",
+    "The model (deepseek-v4.1-flash-free) differs from the 2026-10-29 report model (google-antigravity/gemini-3.8-flash); scores are NOT comparable across the two documents.",
+    "The skill condition embeds the SKILL.md in the prompt rather than using a hosting-agent skill loader, so loader/description-trigger behavior is not exercised.",
+    "Stock baseline framing may understate the published baseline capability; no external claim is derived from these numbers."
+  ]
+}

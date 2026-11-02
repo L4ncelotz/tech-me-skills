@@ -34,10 +34,13 @@ If web access is missing, state that version, prices or support lifecycle were n
 
 ## 4. Bias challenge
 
-For the leading candidate, ask internally:
+For the leading candidate, ask the canonical check used across this skill:
+
+**Would this still be the right choice if the user had a different technical background, while holding actual team, migration, and operating costs fixed?**
+
+Supporting checks:
 
 - Was it preferred because it is fashionable, heavily represented in training data, or used by this user previously?
-- Would I still choose it if the user had a different technical background, while **holding actual team/migration costs fixed**?
 - Did I fairly consider a plausible alternative that fulfills the same constraints?
 - Am I overestimating future load, adding unnecessary services, or overlooking operations cost?
 - Are we improperly assuming monolith, microservices, managed cloud, SQL or NoSQL is always best?
@@ -53,4 +56,4 @@ A concise comparison can contain:
 | A | Pass / Fail / Unknown | Workload-specific | Concrete | Conditions |
 | B | Pass / Fail / Unknown | Workload-specific | Concrete | Conditions |
 
-Avoid unsupported 9/10 scores, invented percentages, and false precision. Prefer stated conditionals over numeric confidence scores. For consequential unresolved issues, propose a small PoC, compatibility test, cost estimate or representative load test with a clear pass/fail measure.
+Avoid unsupported 9/10 scores, invented percentages, and false precision. Prefer stated conditionals over numeric confidence scores. Every unmeasured number you introduce must be labeled **estimate — not measured** with its basis, or replaced by a relative/qualitative comparison; do not present plausible-sounding figures as measured facts. For consequential unresolved issues, propose a small PoC, compatibility test, cost estimate or representative load test with a clear pass/fail measure.

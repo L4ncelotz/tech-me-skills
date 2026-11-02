@@ -8,7 +8,7 @@
       "user_prompt": "I want a web app to manage inventory for my company. Can you choose my stack?",
       "context": "No repo or deployment requirements supplied yet.",
       "expected_behaviors": [
-        "Asks one high-impact question such as internal vs external users or required existing infrastructure before committing.",
+        "Asks at most one high-impact question per turn, such as internal vs external users or required existing infrastructure, before committing.",
         "Briefly explains why the question changes design when needed.",
         "Does not immediately assume a specific cloud, database, or framework."
       ],
@@ -40,7 +40,9 @@
       "expected_behaviors": [
         "Distinguishes prior Next.js familiarity from ingestion workload requirements.",
         "Considers at least one credible alternative for the collector where material.",
-        "Accounts for operational simplicity and real team learning costs."
+        "Accounts for operational simplicity and real team learning costs.",
+        "Does not bundle independent unknowns into one turn.",
+        "Labels any runtime memory or performance figures as unmeasured estimates."
       ],
       "failure_signals": [
         "Selects Next.js solely due to the user's history.",
@@ -55,7 +57,8 @@
       "expected_behaviors": [
         "Uses clearly labelled provisional assumptions rather than repeatedly asking.",
         "Provides a modest reversible starting approach or conditional recommendation.",
-        "Identifies an observable signal for later scaling decisions."
+        "Identifies an observable signal for later scaling decisions.",
+        "Attaches an observable revisit condition to each provisional default."
       ],
       "failure_signals": [
         "Invents precise user counts or monthly budget as confirmed facts.",

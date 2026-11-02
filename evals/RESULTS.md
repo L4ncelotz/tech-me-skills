@@ -112,3 +112,20 @@ With one response per condition per scenario, these observations describe the sa
 - **Scenario coverage:** 3 of 14 fixture scenarios in [scenarios.json](scenarios.json); only the `unknowns`, `existing-project`, and `bias` categories were exercised. Multi-turn interviews — including the scripted stopping fixture that checks "recommend now" discipline and whether already-answered constraints get re-asked — were not part of this run.
 - **Model and configuration:** a single model (`google-antigravity/gemini-3.8-flash`) at temperature 0.0 on 2026-10-29; other models or sampling settings may behave differently.
 - **Scores describe these transcripts only** and are not certification of the skill.
+
+---
+
+## Addendum: Post-Change Spot-Check (v0.1.1, 2026-11-02)
+
+After the v0.1.1 skill edits (one-question rule, explicit revisit triggers, canonical bias check, estimate labeling), a separate informal spot-check was performed against the affected fixture scenarios. Full transcripts, per-dimension scores, and limitations live in [`runs/run_20261102_spotcheck.json`](runs/run_20261102_spotcheck.json) (`SKILL.md` SHA-256 `82c218121703f4f5c64e166bb8c5a02acca3915411bd441e94dc9f0449e51473`).
+
+**This addendum is informal and not comparable to the main report above.** It uses a different model (`deepseek-v4.1-flash-free` vs `gemini-3.8-flash`), one-shot OpenCode subagent runs with the skill embedded in the prompt (no hosting-agent loader), non-blind scoring, and n = 1 per condition. No cross-document comparison, score trend, or descriptive claim may be derived from combining the two data sets.
+
+Observed in the two spot-checked scenarios (transcripts in the JSON only, no additional claim attached):
+
+- One upstream question per turn held in both; no independent unknowns were bundled.
+- Each provisional default carried an explicit observable reopen condition, and unmeasured figures were labeled as estimates rather than asserted.
+- No critical failure was observed in the sampled skill responses; the sampled baseline repeated the premature-stack failure class already recorded in the main report.
+- An isolated adherence drift was noted: the familiarity counterfactual was applied with the intended cost-held-fixed reasoning, but the quoted phrasing did not use the v0.1.1 canonical wording verbatim. Future runs should re-check phrasing adherence.
+
+The baseline samples in the spot-check used a generic assistant framing and may not represent the published baseline capability of the main report.

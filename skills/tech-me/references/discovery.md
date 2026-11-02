@@ -14,7 +14,7 @@ Load only when the user's requirements are incomplete or an interview is useful.
 
 ## How to ask
 
-- Ask one question at a time, phrased in the user's language. Mention why it matters only when non-obvious.
+- Ask one question at a time, phrased in the user's language. One turn covers one decision; if two unknowns are independent, ask them in separate turns. Mention why it matters only when non-obvious.
 - If they don't understand a term, explain it in one or two sentences and give a concrete example.
 - Prefer a question that splits viable architectures (e.g., “must it run on your existing server?”) over a detailed question that would not change the answer.
 - Do not ask “what throughput?” when the user cannot reasonably know; use the simplest safe provisional baseline and define how to measure later.
@@ -35,6 +35,7 @@ For each significant unknown, record:
 | Default | What is the minimal defensible **provisional** assumption? |
 | Risk | Could being wrong change the design? |
 | Verify | Which question, metric, or test would resolve it? |
+| Revisit when | Observable trigger (metric threshold, growth event, or constraint change) that would reopen this default |
 
 A provisional assumption must be understandable and reversible. If unknowns could materially change a high-risk or irreversible decision, make the recommendation **conditional** and identify the blocking evidence. Never pretend to know exact scale, traffic, budgets, or compliance rules.
 

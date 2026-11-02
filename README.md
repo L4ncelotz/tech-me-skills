@@ -91,7 +91,8 @@ tech-me/
 ├── scripts/
 │   ├── validate_repo.py         # Stdlib-only structural checks
 │   ├── pack_release.py          # Release packaging from committed Git tree
-│   └── run_evals.py             # Evaluation harness and fixture preparation
+│   ├── run_evals.py             # Evaluation harness and fixture preparation
+│   └── make_release_notes.py    # UTF-8 release-notes extractor (BOM/NUL fail-closed)
 ├── tests/
 │   ├── test_validator.py        # Automated validator regression checks
 │   └── test_scripts.py          # Packaging and eval harness regression checks

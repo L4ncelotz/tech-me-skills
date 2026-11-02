@@ -5,6 +5,8 @@
 **Configuration:** Identical model and sampling parameters for baseline and skill-enabled runs  
 **Evaluator:** Systematic rubric review per `evals/RUBRIC.md` and `evals/RUNBOOK.md`  
 
+> **Historical report (v0.1.0):** Recorded on 2026-10-29 against `SKILL.md` SHA-256 `10831862b219976e492d050d2030c74a4ea5953c0c32d4b7a30568da80b280f6`, before the v0.1.1 changes to discovery, bias control, revisit triggers, and estimate labeling. These scores must not be read as validating those changes.
+
 ---
 
 ## Executive Summary
@@ -107,6 +109,6 @@ With one response per condition per scenario, these observations describe the sa
 ## Limitations of This Run
 
 - **Sample size:** one response per condition per scenario; generation variability was not sampled.
-- **Scenario coverage:** three of thirteen fixture scenarios; only the `unknowns`, `existing-project`, and `bias` categories were exercised. Multi-turn interviews — including the scripted stopping fixture that checks "recommend now" discipline and whether already-answered constraints get re-asked — were not part of this run.
+- **Scenario coverage:** 3 of 14 fixture scenarios in [scenarios.json](scenarios.json); only the `unknowns`, `existing-project`, and `bias` categories were exercised. Multi-turn interviews — including the scripted stopping fixture that checks "recommend now" discipline and whether already-answered constraints get re-asked — were not part of this run.
 - **Model and configuration:** a single model (`google-antigravity/gemini-3.8-flash`) at temperature 0.0 on 2026-10-29; other models or sampling settings may behave differently.
 - **Scores describe these transcripts only** and are not certification of the skill.

@@ -36,17 +36,35 @@ For local development (from the repository root):
 npx skills add ./skills/tech-me
 ```
 
+For Claude Code (plugin marketplace, **not yet verified with `claude plugin validate`**):
+
+```text
+/plugin marketplace add L4ncelotz/tech-me-skills
+/plugin install tech-me@tech-me-skills
+```
+
+Claude Code namespaces plugin skills, so a plugin install is invoked as `/tech-me:tech-me`; a standalone `npx skills add` install is invoked as `/tech-me`.
+
 The skills CLI may prompt for an agent and install location. In Claude Code, an installed skill is also available as the `/tech-me` command. In other agents, automatic activation and command naming vary; ask for Tech-Me by name. Either way, the portable contract is the skill metadata and instructions, **not** a guaranteed slash command on every platform.
 
 ## Use
 
-On Claude Code, invoke the installed skill directly:
+On Claude Code, invoke the installed skill directly (or pass a mode):
 
 ```text
 /tech-me
 ```
 
-In any agent, ask for Tech-Me by name, for example:
+| Mode | Example | Behavior |
+| :--- | :--- | :--- |
+| **Default** | `/tech-me I want to build an internal booking tool` | Adaptive discovery (1 focused question per turn, stops when sufficient) |
+| **`quick`** | `/tech-me quick Compare SQLite vs Postgres for a local CLI` | **0 questions** — immediate recommendation with labeled assumptions |
+| **`review`** | `/tech-me review` | Fast read-only codebase inspection (manifests/configs first) and architecture review |
+| **`migrate`** | `/tech-me migrate Should we move from monolith to microservices?` | Evaluates migration cost, downtime, rollback risk, and staged alternatives |
+| **`adr`** | `/tech-me adr` | Drafts an Architecture Decision Record from the current decision |
+| **`help`** | `/tech-me help` (or bare `/tech-me`) | Shows the mode cheat-sheet and asks what you are deciding |
+
+In any agent, you can also ask for Tech-Me by name with the same modes, for example:
 
 ```text
 Use Tech-Me. I want to build a small internal inventory application.
@@ -136,6 +154,9 @@ tech-me/
 ├── tests/
 │   ├── test_validator.py        # Automated validator regression checks
 │   └── test_scripts.py          # Packaging and eval harness regression checks
+├── .claude-plugin/
+│   ├── plugin.json              # Claude Code plugin manifest
+│   └── marketplace.json         # Single-plugin marketplace catalog
 ├── .github/workflows/validate.yml
 ├── .gitattributes
 ├── .gitignore

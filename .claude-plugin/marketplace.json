@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "tech-me-skills",
+  "description": "Tech-Me evidence-based technical architecture advisor skill and plugin.",
+  "owner": {
+    "name": "L4ncelotz"
+  },
+  "plugins": [
+    {
+      "name": "tech-me",
+      "description": "Evidence-based technical architecture advisor with adaptive discovery, fast codebase review, migration evaluation, and ADR drafting.",
+      "author": {
+        "name": "L4ncelotz"
+      },
+      "category": "architecture",
+      "source": "./"
+    }
+  ]
+}

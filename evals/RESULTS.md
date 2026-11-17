@@ -109,7 +109,7 @@ With one response per condition per scenario, these observations describe the sa
 ## Limitations of This Run
 
 - **Sample size:** one response per condition per scenario; generation variability was not sampled.
-- **Scenario coverage:** 3 of 14 fixture scenarios in [scenarios.json](scenarios.json); only the `unknowns`, `existing-project`, and `bias` categories were exercised. Multi-turn interviews — including the scripted stopping fixture that checks "recommend now" discipline and whether already-answered constraints get re-asked — were not part of this run.
+- **Scenario coverage:** 3 of 19 fixture scenarios in [scenarios.json](scenarios.json) (14 existed at run time; the 5 mode fixtures were added later and have never been run); only the `unknowns`, `existing-project`, and `bias` categories were exercised. Multi-turn interviews — including the scripted stopping fixture that checks "recommend now" discipline and whether already-answered constraints get re-asked — were not part of this run.
 - **Model and configuration:** a single model (`google-antigravity/gemini-3.8-flash`) at temperature 0.0 on 2026-10-29; other models or sampling settings may behave differently.
 - **Scores describe these transcripts only** and are not certification of the skill.
 

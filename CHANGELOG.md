@@ -4,6 +4,23 @@ All notable changes to this project should be documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Invocation modes in `skills/tech-me/SKILL.md`: `/tech-me <topic>` (default adaptive interview), `quick` (no questions, labeled assumptions), `review` (read-only, manifests and configs first), `migrate` (transition cost and rollback), `adr` (draft a decision record), and `help` / bare `/tech-me` (mode cheat-sheet). Modes also work as natural language in agents without slash commands.
+- `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` for Claude Code plugin installs. Not yet checked with `claude plugin validate` or a real install.
+- `evals/scenarios.json`: 5 mode fixtures (`mode-quick-no-questions`, `mode-review-fast-inspect`, `mode-migrate-sqlite-postgres`, `mode-adr-from-decision`, `mode-help-menu`), bringing total scenarios to 19.
+- `scripts/validate_repo.py` and `tests/test_validator.py`: validation for optional `mode` field, required non-default mode fixture coverage, and Claude plugin manifest alignment (`name` vs skill, `version` vs latest released CHANGELOG entry, marketplace `source`).
+- README mode table and plugin install instructions.
+
+### Changed
+
+- SKILL.md `description` now names the modes and the review/migration use cases.
+- `evals/RESULTS.md`: updated scenario coverage line to `3 of 19 fixture scenarios` (with historical note) to stay in sync with `evals/scenarios.json`.
+
+### Limitations
+
+- The 5 new mode fixtures have not been evaluated against a model yet. `mode-review-fast-inspect` is a text-only prompt simulating a repo until Phase 1.1 adds real fixture repos; it cannot test tool-level `.env` avoidance yet. The `review` inspect order comes from one tester's informal report (faster, fewer tokens) and has not been measured.
+
 ## [0.1.1] - 2026-11-02
 
 ### Added

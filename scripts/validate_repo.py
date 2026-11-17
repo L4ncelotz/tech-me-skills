@@ -24,6 +24,8 @@ CATEGORIES = {
     "overengineering", "evolution", "evidence", "risk", "communication",
     "permissions", "activation",
 }
+MODES = {"default", "quick", "review", "migrate", "adr", "help"}
+REQUIRED_MODES = MODES - {"default"}
 ALLOWED_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_RE = re.compile(r"\]\(([^)]+)\)")
@@ -108,6 +110,7 @@ def validate_scenarios(path: Path) -> list[str]:
         return errors + ["scenarios must be a non-empty list."]
     ids = set()
     seen_categories = set()
+    seen_modes = set()
     required = ("id", "category", "user_prompt", "context", "expected_behaviors", "failure_signals")
     for idx, item in enumerate(scenarios, 1):
         label = f"scenarios[{idx}]"
@@ -128,6 +131,12 @@ def validate_scenarios(path: Path) -> list[str]:
             errors.append(f"{label} has invalid category: {cat!r}")
         else:
             seen_categories.add(cat)
+        mode = item.get("mode")
+        if mode is not None:
+            if not isinstance(mode, str) or mode not in MODES:
+                errors.append(f"{label} has invalid mode: {mode!r}")
+            else:
+                seen_modes.add(mode)
         for field in ("user_prompt", "context"):
             if not isinstance(item.get(field), str) or not item[field].strip():
                 errors.append(f"{label} {field} must be a nonempty string.")
@@ -142,6 +151,9 @@ def validate_scenarios(path: Path) -> list[str]:
     missing = CATEGORIES - seen_categories
     if missing:
         errors.append(f"Missing evaluation categories: {', '.join(sorted(missing))}")
+    missing_modes = REQUIRED_MODES - seen_modes
+    if missing_modes:
+        errors.append(f"Missing mode fixtures: {', '.join(sorted(missing_modes))}")
     return errors
 
 

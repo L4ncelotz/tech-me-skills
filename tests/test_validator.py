@@ -160,6 +160,22 @@ class ValidationTests(unittest.TestCase):
             (root / ".claude-plugin/plugin.json").write_text("{broken json", encoding="utf-8")
             self.assertTrue(any("Invalid .claude-plugin/plugin.json" in err for err in validate_plugin(root)))
 
+    def test_rejects_invalid_mode(self):
+        fixture = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
+        fixture["scenarios"][0]["mode"] = "turbo"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "scenarios.json"
+            path.write_text(json.dumps(fixture), encoding="utf-8")
+            self.assertTrue(any("has invalid mode" in err for err in validate_scenarios(path)))
+
+    def test_rejects_missing_mode_fixture(self):
+        fixture = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
+        fixture["scenarios"] = [s for s in fixture["scenarios"] if s.get("mode") != "adr"]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "scenarios.json"
+            path.write_text(json.dumps(fixture), encoding="utf-8")
+            self.assertTrue(any("Missing mode fixtures: adr" in err for err in validate_scenarios(path)))
+
 
 if __name__ == "__main__":
     unittest.main()

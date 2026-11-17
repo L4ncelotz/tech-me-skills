@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from validate_repo import ROOT, SUMMARY_HEADING, validate_repo, validate_results_claims, validate_scenarios, validate_skill  # noqa: E402
+from validate_repo import ROOT, SUMMARY_HEADING, validate_plugin, validate_repo, validate_results_claims, validate_scenarios, validate_skill  # noqa: E402
 
 
 class ValidationTests(unittest.TestCase):
@@ -121,6 +121,44 @@ class ValidationTests(unittest.TestCase):
             self.assertTrue(
                 any("turns must be a non-empty list of strings" in err for err in validate_scenarios(path))
             )
+
+    def _write_valid_plugin_tree(self, root: Path, *, name="tech-me", version="0.1.1", changelog="## [0.1.1] - 2026-11-02\n", plugins=None):
+        plugin_dir = root / ".claude-plugin"
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+        (plugin_dir / "plugin.json").write_text(
+            json.dumps({"name": name, "version": version}), encoding="utf-8"
+        )
+        if plugins is None:
+            plugins = [{"name": "tech-me", "source": "./"}]
+        (plugin_dir / "marketplace.json").write_text(
+            json.dumps({"name": "tech-me-skills", "plugins": plugins}), encoding="utf-8"
+        )
+        (root / "CHANGELOG.md").write_text(changelog, encoding="utf-8")
+
+    def test_rejects_plugin_name_mismatch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_valid_plugin_tree(root, name="other-plugin")
+            self.assertTrue(any("must match skill" in err for err in validate_plugin(root)))
+
+    def test_rejects_plugin_version_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_valid_plugin_tree(root, version="0.1.1", changelog="## [Unreleased]\n\n## [9.9.9] - 2026-12-01\n")
+            self.assertTrue(any("does not match latest CHANGELOG release" in err for err in validate_plugin(root)))
+
+    def test_rejects_marketplace_without_plugin(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_valid_plugin_tree(root, plugins=[])
+            self.assertTrue(any("plugins must be a non-empty list" in err for err in validate_plugin(root)))
+
+    def test_rejects_invalid_plugin_json(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self._write_valid_plugin_tree(root)
+            (root / ".claude-plugin/plugin.json").write_text("{broken json", encoding="utf-8")
+            self.assertTrue(any("Invalid .claude-plugin/plugin.json" in err for err in validate_plugin(root)))
 
 
 if __name__ == "__main__":

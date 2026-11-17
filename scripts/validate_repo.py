@@ -14,6 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL_NAME = "tech-me"
 SCENARIOS_PATH = "evals/scenarios.json"
 RESULTS_PATH = "evals/RESULTS.md"
+PLUGIN_PATH = ".claude-plugin/plugin.json"
+MARKETPLACE_PATH = ".claude-plugin/marketplace.json"
+CHANGELOG_PATH = "CHANGELOG.md"
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+RELEASED_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.MULTILINE)
 CATEGORIES = {
     "discovery", "stopping", "bias", "unknowns", "feasibility", "existing-project",
     "overengineering", "evolution", "evidence", "risk", "communication",
@@ -172,9 +177,64 @@ def validate_results_claims(results_path: Path, scenario_ids: set[str]) -> list[
     return errors
 
 
+def validate_plugin(root: Path) -> list[str]:
+    """Verify Claude Code plugin and marketplace manifests stay aligned with the skill and CHANGELOG."""
+    errors: list[str] = []
+    plugin_path = root / PLUGIN_PATH
+    marketplace_path = root / MARKETPLACE_PATH
+    if not plugin_path.is_file():
+        return [f"Missing plugin manifest: {PLUGIN_PATH}"]
+    try:
+        plugin = json.loads(plugin_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeError) as exc:
+        return [f"Invalid {PLUGIN_PATH}: {exc}"]
+    if not isinstance(plugin, dict):
+        return [f"{PLUGIN_PATH} must be a JSON object."]
+
+    plugin_name = plugin.get("name")
+    if plugin_name != SKILL_NAME:
+        errors.append(f"{PLUGIN_PATH} name {plugin_name!r} must match skill {SKILL_NAME!r}.")
+
+    version = plugin.get("version")
+    if not isinstance(version, str) or not SEMVER_RE.fullmatch(version):
+        errors.append(f"{PLUGIN_PATH} version must be a semver string (X.Y.Z).")
+    else:
+        changelog = root / CHANGELOG_PATH
+        if changelog.is_file():
+            match = RELEASED_RE.search(changelog.read_text(encoding="utf-8"))
+            if match and version != match.group(1):
+                errors.append(
+                    f"{PLUGIN_PATH} version {version!r} does not match latest CHANGELOG release {match.group(1)!r}."
+                )
+
+    if not marketplace_path.is_file():
+        errors.append(f"Missing marketplace manifest: {MARKETPLACE_PATH}")
+        return errors
+    try:
+        marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeError) as exc:
+        errors.append(f"Invalid {MARKETPLACE_PATH}: {exc}")
+        return errors
+    if not isinstance(marketplace, dict):
+        errors.append(f"{MARKETPLACE_PATH} must be a JSON object.")
+        return errors
+
+    plugins = marketplace.get("plugins")
+    if not isinstance(plugins, list) or not plugins:
+        errors.append(f"{MARKETPLACE_PATH} plugins must be a non-empty list.")
+        return errors
+    matching = [entry for entry in plugins if isinstance(entry, dict) and entry.get("name") == SKILL_NAME]
+    if not matching:
+        errors.append(f"{MARKETPLACE_PATH} must list plugin {SKILL_NAME!r}.")
+    elif not any(entry.get("source") == "./" for entry in matching):
+        errors.append(f"{MARKETPLACE_PATH} entry for {SKILL_NAME!r} must point source to './'.")
+    return errors
+
+
 def validate_repo(root: Path) -> list[str]:
     errors: list[str] = []
     errors.extend(validate_skill(root / "skills" / SKILL_NAME))
+    errors.extend(validate_plugin(root))
     scenarios_file = root / SCENARIOS_PATH
     scenario_errors = validate_scenarios(scenarios_file)
     errors.extend(scenario_errors)

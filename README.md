@@ -56,6 +56,8 @@ For Claude Code (plugin marketplace, **not yet verified with `claude plugin vali
 
 Claude Code namespaces plugin skills, so a plugin install is invoked as `/tech-me:tech-me`; a standalone `npx skills add` install is invoked as `/tech-me`. Pick **one** install method per agent so the skill is not duplicated.
 
+For **claude.ai** custom skill upload, download `tech-me-skill-<ver>.zip` from [Releases](https://github.com/L4ncelotz/tech-me-skills/releases) (or build locally with `python scripts/pack_release.py --version <ver> --skill-zip --allow-untagged`) and upload via **Settings → Capabilities → Skills**.
+
 The skills CLI may prompt for an agent and install location. In Claude Code, an installed skill is also available as the `/tech-me` command. In other agents, automatic activation and command naming vary; ask for Tech-Me by name. Either way, the portable contract is the skill metadata and instructions, **not** a guaranteed slash command on every platform.
 
 ## Use
@@ -154,7 +156,10 @@ tech-me/
 │   ├── references/
 │   │   ├── discovery.md         # Adaptive questions and stop conditions
 │   │   ├── evaluation.md        # Constraints, evidence and bias control
-│   │   └── output.md            # Decision reporting patterns
+│   │   ├── output.md            # Decision reporting patterns
+│   │   ├── playbook-database.md # Storage & database decision criteria
+│   │   ├── playbook-hosting.md  # Compute & hosting decision criteria
+│   │   └── playbook-migration.md# Boundary & migration decision ladder
 │   └── assets/adr-template.md   # Optional ADR template
 ├── evals/
 │   ├── scenarios.json           # Scenario-based evaluation fixtures

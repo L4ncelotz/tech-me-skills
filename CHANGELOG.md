@@ -4,6 +4,11 @@ All notable changes to this project should be documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Domain Playbooks under `skills/tech-me/references/` (`playbook-database.md`, `playbook-hosting.md`, `playbook-migration.md`), linked from `skills/tech-me/SKILL.md` for on-demand loading without volatile pricing or version numbers.
+- `--skill-zip` flag in `scripts/pack_release.py` to build standalone `tech-me-skill-<ver>.zip` archives rooted at `tech-me/` (`SKILL.md`, `references/`, `assets/`, rejecting `README.md` at skill root) for `claude.ai` uploads, covered by 3 new unit tests in `tests/test_scripts.py` and documented in `PUBLISHING.md` and `README.md`.
+
 ## [0.2.0] - 2026-11-18
 
 ### Added

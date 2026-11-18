@@ -267,6 +267,89 @@ class ScriptTests(unittest.TestCase):
             self.assertIn("Release tag 'v0.1.0' not found", str(ctx.exception))
             self.assertIn("a branch named 'v0.1.0' exists", str(ctx.exception))
             self.assertFalse((out_dir / "tech-me-0.1.0.zip").exists())
+
+    def _create_skill_repo(self, tmp_dir: str, *, tag: str | None = None, include_skill_readme: bool = False) -> Path:
+        repo_dir = Path(tmp_dir) / "skill_repo"
+        skill_dir = repo_dir / "skills" / "tech-me"
+        (skill_dir / "references").mkdir(parents=True)
+        (skill_dir / "assets").mkdir(parents=True)
+        (repo_dir / "scripts").mkdir()
+        (skill_dir / "SKILL.md").write_text("---\nname: tech-me\ndescription: Test\n---\n# Tech-Me\n", encoding="utf-8")
+        (skill_dir / "references" / "discovery.md").write_text("# Discovery\n", encoding="utf-8")
+        (skill_dir / "assets" / "adr-template.md").write_text("# ADR\n", encoding="utf-8")
+        if include_skill_readme:
+            (skill_dir / "README.md").write_text("# Should not be packaged\n", encoding="utf-8")
+        (repo_dir / "README.md").write_text("# Repo README\n", encoding="utf-8")
+        (repo_dir / "scripts" / "helper.py").write_text("print('hi')\n", encoding="utf-8")
+
+        subprocess.run(["git", "init"], cwd=repo_dir, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.name", "Test"], cwd=repo_dir, check=True)
+        subprocess.run(["git", "config", "user.email", "test@test.local"], cwd=repo_dir, check=True)
+        subprocess.run(["git", "add", "."], cwd=repo_dir, check=True)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=repo_dir, capture_output=True, check=True)
+        if tag:
+            subprocess.run(["git", "tag", "-a", tag, "-m", f"Tag {tag}"], cwd=repo_dir, capture_output=True, check=True)
+        return repo_dir
+
+    def test_pack_skill_zip_structure_for_claude_ai(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_dir = self._create_skill_repo(tmp_dir, tag="v0.1.0")
+            out_dir = Path(tmp_dir) / "dist"
+            zip_path = pack_release(version="0.1.0", output_dir=out_dir, repo_root=repo_dir, skill_only=True)
+            self.assertEqual(zip_path.name, "tech-me-skill-0.1.0.zip")
+            with zipfile.ZipFile(zip_path, "r") as zf:
+                files = {n for n in zf.namelist() if not n.endswith("/")}
+                self.assertEqual(
+                    files,
+                    {
+                        "tech-me/SKILL.md",
+                        "tech-me/references/discovery.md",
+                        "tech-me/assets/adr-template.md",
+                    },
+                )
+
+    def test_pack_skill_zip_rejects_skill_readme_and_untagged(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_dir = self._create_skill_repo(tmp_dir, tag=None, include_skill_readme=True)
+            out_dir = Path(tmp_dir) / "dist"
+            with self.assertRaises(RuntimeError) as untagged_ctx:
+                pack_release(version="0.1.0", output_dir=out_dir, repo_root=repo_dir, skill_only=True)
+            self.assertIn("Release tag 'v0.1.0' not found", str(untagged_ctx.exception))
+
+            with self.assertRaises(RuntimeError) as readme_ctx:
+                pack_release(
+                    version="0.1.0",
+                    output_dir=out_dir,
+                    repo_root=repo_dir,
+                    require_tag=False,
+                    skill_only=True,
+                )
+            self.assertIn("tech-me/README.md", str(readme_ctx.exception))
+            self.assertFalse((out_dir / "tech-me-skill-0.1.0.zip").exists())
+
+    def test_pack_skill_zip_cli_flag(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_dir = self._create_skill_repo(tmp_dir, tag="v0.1.0")
+            out_dir = Path(tmp_dir) / "dist"
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "pack_release.py"),
+                    "--version",
+                    "0.1.0",
+                    "--skill-zip",
+                    "--repo-root",
+                    str(repo_dir),
+                    "--output-dir",
+                    str(out_dir),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertTrue((out_dir / "tech-me-skill-0.1.0.zip").is_file())
+
+
 CHANGELOG_FIXTURE = """# Changelog
 
 ## [Unreleased]

@@ -78,8 +78,8 @@
 
 **งาน**
 
-- [ ] 1.1 Domain Playbooks ใน `skills/tech-me/references/` (โหลดเมื่อจำเป็น ไม่ใส่ราคา/เลขเวอร์ชันที่เน่าเร็ว): Database/Storage, Hosting/Compute, และ Boundary/Migration
-- [ ] 1.2 เพิ่ม `--skill-zip` ใน `pack_release.py` ให้ได้ `tech-me-skill-<ver>.zip` ที่รากเป็นโฟลเดอร์ `tech-me/` สำหรับอัปโหลดบน claude.ai พร้อม unit tests
+- [x] 1.1 Domain Playbooks ใน `skills/tech-me/references/` (โหลดเมื่อจำเป็น ไม่ใส่ราคา/เลขเวอร์ชันที่เน่าเร็ว): Database/Storage (`playbook-database.md`), Hosting/Compute (`playbook-hosting.md`), และ Boundary/Migration (`playbook-migration.md`)
+- [x] 1.2 เพิ่ม `--skill-zip` ใน `pack_release.py` ให้ได้ `tech-me-skill-<ver>.zip` ที่รากเป็นโฟลเดอร์ `tech-me/` สำหรับอัปโหลดบน claude.ai พร้อม unit tests (3 tests) และคู่มือใน `PUBLISHING.md`
 - [ ] 1.3 รัน `claude plugin validate .` และทดสอบติดตั้งจริงผ่าน `/plugin marketplace add L4ncelotz/tech-me-skills` ยืนยันชื่อคำสั่ง (`/tech-me:tech-me` และ `/tech-me:tech-me-*`)
 - [ ] 1.4 Dogfood: ใช้ทุกโหมด (`default`, `quick`, `review`, `migrate`, `adr`, `help`) กับโปรเจกต์จริงบน `teveus`, Claude Code, และ Antigravity อย่างน้อยโหมดละ 1 ครั้ง และบันทึกจุดที่พลาด
 
@@ -137,7 +137,7 @@
 | การแก้ encoding | Python utf-8 หรือบังคับ Git Bash | **ตัดสินแล้ว: ใช้สคริปต์** `scripts/make_release_notes.py` (เขียนไฟล์เอง fail-closed) · workflow เดียวใช้ได้ทุก shell · ปิดใน v0.1.1 |
 | โหมด quick/review/adr | ทำหรือรอ | **ตัดสินแล้ว (17–18 พ.ย.): ทำ** · ได้ feedback จากผู้ทดลองจริง · เพิ่ม `migrate` และ `help` ด้วย (v0.2.0) |
 | shortcut commands | 1 skill หรือเพิ่ม `commands/` | **ตัดสินแล้ว (18 พ.ย.): เพิ่ม `commands/tech-me-*.md`** เป็น wrapper ชี้ไป `tech-me` โดยไม่คัดลอกกฎซ้ำ สำหรับเมนู `/` ของ plugin และ `teveus` |
-| รูปแบบ zip สำหรับ claude.ai | โฟลเดอร์ tech-me/ ที่ราก | ยังไม่ตัดสินรูปเล็กย่อย · เอกสารอัปโหลดตรวจแล้ว · ลงมือทำพร้อม `pack_release.py --skill-zip` ในข้อ 1.2 |
+| รูปแบบ zip สำหรับ claude.ai | โฟลเดอร์ tech-me/ ที่ราก | **ตัดสินแล้ว (19 พ.ย.): ใช้ `--skill-zip`** ใน `pack_release.py` สร้าง `tech-me-skill-<ver>.zip` ที่มีรากเป็น `tech-me/` (`SKILL.md`, `references/`, `assets/`, ไม่มี `README.md`) |
 
 ## 9. ความเสี่ยงโดยรวม
 

@@ -1,6 +1,8 @@
 # Tech-Me
 
 [![Validate Tech-Me](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml)
+[![Pre-release](https://img.shields.io/badge/status-pre--release%20v0.1.1-orange)](https://github.com/L4ncelotz/tech-me-skills/releases)
+[![Roadmap](https://img.shields.io/badge/roadmap-Phase%200.5%20%E2%86%92%20v1.0-blue)](ROADMAP.md)
 
 **Evidence-based technical architecture decisions, without the stack bias.**
 
@@ -11,6 +13,15 @@ Tech-Me is a portable Agent Skill that interviews you **only as much as needed**
 [Agent Skills format](https://agentskills.io/specification) · [Skills CLI](https://skills.sh/docs/cli)
 
 ## What it does
+
+```mermaid
+flowchart LR
+  O["1. Orient<br/>(constraints & repo)"] --> D["2. Discover<br/>(1 question / turn)"]
+  D --> E["3. Evaluate<br/>(bias & evidence)"]
+  E --> C["4. Challenge<br/>(quality gate)"]
+  C --> R["5. Recommend<br/>(trade-offs + triggers)"]
+  R -. "/tech-me adr" .-> A["6. Document<br/>(optional ADR)"]
+```
 
 - **Adaptive discovery:** asks one high-impact question at a time and stops when information is sufficient. “Recommend now” is always valid.
 - **Bias-controlled evaluation:** separates requirements and hard constraints from a user's past stacks and preferences.
@@ -171,7 +182,16 @@ tech-me/
 
 ## Validate and evaluate
 
-Requires Python 3.10+ **for repository validation only**, not for running the skill itself.
+Validation is organized into two distinct layers:
+
+1. **Structural Validation (`scripts/validate_repo.py`, `tests/`)**: Offline, zero-dependency deterministic checks verifying YAML frontmatter, relative reference integrity, plugin manifest parity, and evaluation scenario schema conformity (not a substitute for the upstream `skills-ref` specification validator).
+2. **Behavioral Evaluation Suite (`evals/`)**: Scenario-based qualitative evaluations comparing baseline and skill-enabled model behavior against [evals/RUBRIC.md](evals/RUBRIC.md) and [evals/RUNBOOK.md](evals/RUNBOOK.md).
+   - **Initial run (`evals/runs/run_20261029_step6.json`):** 3 sampled scenarios under `google-antigravity/gemini-3.8-flash` on 2026-10-29 (see [Evaluation Results](evals/RESULTS.md)).
+   - **Informal spot-check (`evals/runs/run_20261102_spotcheck.json`):** `deepseek-v4.1-flash-free`, `n = 1` per condition, non-blind on 2026-11-02 to regression-test v0.1.1 edits — **not comparable** to the main report and must never be read as a score trend.
+   - **Scope:** Findings describe specific prompt behaviors under fixed parameters and do **not** imply cross-agent certification across arbitrary client runtimes (e.g., Cursor, Claude Code, Cline), for which multi-agent empirical testing is ongoing prior to v1.0.
+
+<details>
+<summary>Maintainer commands (requires Python 3.10+ for validation only, not for running the skill)</summary>
 
 ```bash
 # 1. Structural validation and unit tests
@@ -181,20 +201,15 @@ python -m unittest discover -s tests -v
 # 2. Evaluation harness inspection (dry-run) or fixture preparation
 python scripts/run_evals.py --dry-run
 python scripts/run_evals.py --prepare-fixtures --output dist/prepared_fixtures.json
+
+# 3. Optional upstream specification validation (if skills-ref is installed)
+skills-ref validate ./skills/tech-me
 ```
 
 Fixture output goes to git-ignored `dist/` so an untracked fixture file can never dirty the working tree and block release packaging (`pack_release.py` requires a clean tree).
 
-Optional upstream specification validation if `skills-ref` is installed:
+</details>
 
-```bash
-skills-ref validate ./skills/tech-me
-```
-
-Validation is organized into two distinct layers:
-
-1. **Structural Validation (`scripts/validate_repo.py`, `tests/`)**: Offline, zero-dependency deterministic checks verifying YAML frontmatter, relative reference integrity, and evaluation scenario schema conformity. (Note: this is not a substitute for the upstream `skills-ref` specification validator).
-2. **Behavioral Evaluation Suite (`evals/`)**: Scenario-based qualitative evaluations comparing baseline and skill-enabled model behavior against `evals/RUBRIC.md`. The initial evaluated run (`evals/runs/run_20261029_step6.json`) documents three sampled scenarios under a single model configuration (`google-antigravity/gemini-3.8-flash`) evaluated on 2026-10-29 (see [Evaluation Results](evals/RESULTS.md)). A second, informal post-change spot-check (`evals/runs/run_20261102_spotcheck.json`, 2026-11-02, `deepseek-v4.1-flash-free`, n = 1 per condition, non-blind) regression-tested the v0.1.1 skill edits and is explicitly **not comparable** to the main report — the two runs must never be read as a score trend. These findings characterize specific prompt behaviors under fixed parameters and do **not** imply cross-agent certification across arbitrary client runtimes (e.g., Cursor, Claude Code, Cline), for which multi-agent empirical testing is ongoing prior to v1.0. See [Evaluation Runbook](evals/RUNBOOK.md).
 ## Design boundaries
 
 - No required web search, MCP server, subscription, or runtime dependency.

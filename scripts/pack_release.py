@@ -147,6 +147,7 @@ def pack_release(
     prefix: str | None = None,
     check_clean: bool = True,
     require_tag: bool = True,
+    skill_only: bool = False,
 ) -> Path:
     """Create a clean release ZIP archive from a committed Git tree."""
     if check_clean:
@@ -166,13 +167,19 @@ def pack_release(
             )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    zip_name = f"tech-me-{clean_version}.zip"
+    if skill_only:
+        zip_name = f"tech-me-skill-{clean_version}.zip"
+        archive_prefix = "tech-me/" if prefix is None else prefix
+        archive_target = f"{ref}:skills/tech-me"
+    else:
+        zip_name = f"tech-me-{clean_version}.zip"
+        archive_prefix = f"tech-me-{clean_version}/" if prefix is None else prefix
+        archive_target = ref
     zip_path = output_dir / zip_name
 
-    archive_prefix = f"tech-me-{clean_version}/" if prefix is None else prefix
-
     tag_note = f"tag {tag_name}" if require_tag else "untagged (tag verification skipped)"
-    print(f"Packaging Tech-Me v{clean_version} ({tag_note}) from Git commit {commit_sha[:8]} (ref: {ref})...")
+    kind_note = "skill-only " if skill_only else ""
+    print(f"Packaging Tech-Me {kind_note}v{clean_version} ({tag_note}) from Git commit {commit_sha[:8]} (ref: {ref})...")
 
     # Run git archive directly to extract only the committed tree
     cmd = [
@@ -182,7 +189,7 @@ def pack_release(
         f"--prefix={archive_prefix}",
         "-o",
         str(zip_path.resolve()),
-        ref,
+        archive_target,
     ]
 
     try:
@@ -207,6 +214,14 @@ def pack_release(
         for name in names:
             if is_forbidden(name):
                 forbidden_items.append(name)
+        if skill_only:
+            expected_skill_md = f"{archive_prefix}SKILL.md"
+            if expected_skill_md not in names:
+                forbidden_items.append(f"MISSING:{expected_skill_md}")
+            if f"{archive_prefix}README.md" in names:
+                forbidden_items.append(f"{archive_prefix}README.md")
+            if archive_prefix and any(not name.startswith(archive_prefix) for name in names):
+                forbidden_items.append("INVALID_ROOT_PREFIX")
 
     if forbidden_items:
         zip_path.unlink(missing_ok=True)
@@ -254,6 +269,11 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--skill-zip",
+        action="store_true",
+        help="Package only skills/tech-me/ rooted at tech-me/ (e.g., for claude.ai skill upload)",
+    )
+    parser.add_argument(
         "--repo-root",
         type=Path,
         default=ROOT,
@@ -272,6 +292,7 @@ def main() -> int:
             prefix=prefix,
             check_clean=True,
             require_tag=not args.allow_untagged,
+            skill_only=args.skill_zip,
         )
         return 0
     except Exception as e:

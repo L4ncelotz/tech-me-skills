@@ -40,8 +40,11 @@ Fail closed cases: missing tag, non-annotated tag objects (a lightweight tag poi
 ```bash
 # Automated packaging with integrity assertions
 python scripts/pack_release.py --version 0.1.1
+
+# Optional standalone skill ZIP for claude.ai upload (rooted at tech-me/)
+python scripts/pack_release.py --version 0.1.1 --skill-zip
 ```
-This creates `dist/tech-me-0.1.1.zip` containing only committed files and asserts zero leakage of `.git/`, `__pycache__`, `.pytest_cache`, `.venv`, `.env*`, or temporary files.
+This creates `dist/tech-me-0.1.1.zip` (full repository archive) and `dist/tech-me-skill-0.1.1.zip` (skill-only archive containing `tech-me/SKILL.md`, `references/`, and `assets/` with no `README.md`) from committed files only, asserting zero leakage of `.git/`, `__pycache__`, `.pytest_cache`, `.venv`, `.env*`, or temporary files.
 
 Do not package releases with a hand-rolled `git archive` command. `pack_release.py` is the single supported release path: a manual `git archive` skips the version/tag/commit verification and the forbidden-artifact scan, so an archive built that way must never be distributed.
 

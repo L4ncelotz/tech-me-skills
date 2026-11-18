@@ -4,22 +4,26 @@ All notable changes to this project should be documented here.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-18
+
 ### Added
 
-- Invocation modes in `skills/tech-me/SKILL.md`: `/tech-me <topic>` (default adaptive interview), `quick` (no questions, labeled assumptions), `review` (read-only, manifests and configs first), `migrate` (transition cost and rollback), `adr` (draft a decision record), and `help` / bare `/tech-me` (mode cheat-sheet). Modes also work as natural language in agents without slash commands.
-- `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` for Claude Code plugin installs. Not yet checked with `claude plugin validate` or a real install.
+- Invocation modes in `skills/tech-me/SKILL.md`: `/tech-me <topic>` (default adaptive interview), `quick` (no questions, labeled assumptions), `review` (read-only, manifests and configs first), `migrate` (transition cost and rollback), `adr` (draft a decision record), and `help` / bare `/tech-me` (mode cheat-sheet). Handles both inline arguments and `ARGUMENTS:` expansion (e.g., `teveus` and Claude Code), and works as natural language in agents without slash commands.
+- Anti-rationalization guard table in `skills/tech-me/SKILL.md` to prevent common adherence drift (question bundling, familiarity bias, unmeasured figures, uninspected repository claims).
+- Standalone slash-command wrappers in `commands/` (`tech-me-quick.md`, `tech-me-review.md`, `tech-me-migrate.md`, `tech-me-adr.md`) with `argument-hint` frontmatter and self-contained mode guardrails for Claude Code plugins and `teveus`.
+- `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` for Claude Code plugin installs.
 - `evals/scenarios.json`: 5 mode fixtures (`mode-quick-no-questions`, `mode-review-fast-inspect`, `mode-migrate-sqlite-postgres`, `mode-adr-from-decision`, `mode-help-menu`), bringing total scenarios to 19.
-- `scripts/validate_repo.py` and `tests/test_validator.py`: validation for optional `mode` field, required non-default mode fixture coverage, and Claude plugin manifest alignment (`name` vs skill, `version` vs latest released CHANGELOG entry, marketplace `source`).
-- README mode table and plugin install instructions.
+- `scripts/validate_repo.py` and `tests/test_validator.py`: validation for `commands/tech-me-*.md` wrappers, optional `mode` field, required non-default mode fixture coverage, and Claude plugin manifest alignment (`name` vs skill, `version` vs latest released CHANGELOG entry, marketplace `source`).
+- README workflow Mermaid diagram, mode cheat-sheet, verification step (`/tech-me help`), deduplication notice, and plugin/teveus command usage notes.
 
 ### Changed
 
-- SKILL.md `description` now names the modes and the review/migration use cases.
+- SKILL.md `description` now names the modes and the review/migration use cases; `review` mode also inspects `ARCHITECTURE.md` and `docs/adr/` when present.
 - `evals/RESULTS.md`: updated scenario coverage line to `3 of 19 fixture scenarios` (with historical note) to stay in sync with `evals/scenarios.json`.
 
 ### Limitations
 
-- The 5 new mode fixtures have not been evaluated against a model yet. `mode-review-fast-inspect` is a text-only prompt simulating a repo until Phase 1.1 adds real fixture repos; it cannot test tool-level `.env` avoidance yet. The `review` inspect order comes from one tester's informal report (faster, fewer tokens) and has not been measured.
+- The 5 new mode fixtures have not been evaluated against a model yet. `mode-review-fast-inspect` is a text-only prompt simulating a repo until Phase 1.1 adds real fixture repos; it cannot test tool-level `.env` avoidance yet. The `review` inspect order comes from one tester's informal report (faster, fewer tokens) and has not been measured. `.claude-plugin/` has not yet been tested with `claude plugin validate`.
 
 ## [0.1.1] - 2026-11-02
 

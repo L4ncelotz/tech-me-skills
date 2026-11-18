@@ -26,7 +26,9 @@ CATEGORIES = {
 }
 MODES = {"default", "quick", "review", "migrate", "adr", "help"}
 REQUIRED_MODES = MODES - {"default"}
+COMMAND_MODES = ("quick", "review", "migrate", "adr")
 ALLOWED_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+ALLOWED_COMMAND_FIELDS = {"description", "argument-hint"}
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_RE = re.compile(r"\]\(([^)]+)\)")
 SUMMARY_HEADING = "### Aggregate Score Summary"
@@ -34,29 +36,31 @@ COVERAGE_CLAIM_RE = re.compile(r"\*\*Scenario coverage:\*\*\s+(\d+)\s+of\s+(\d+)
 BACKTICK_RE = re.compile(r"`([^`\n]+)`")
 
 
-def parse_simple_frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
+def parse_simple_frontmatter(
+    text: str, *, allowed_fields: set[str] = ALLOWED_FIELDS, label: str = "SKILL.md"
+) -> tuple[dict[str, str], list[str]]:
     """Validate our own flat, scalar-only frontmatter; not a general YAML parser."""
     errors: list[str] = []
     if not text.startswith("---\n"):
-        return {}, ["SKILL.md must begin with YAML frontmatter (---)."]
+        return {}, [f"{label} must begin with YAML frontmatter (---)."]
     end = text.find("\n---\n", 4)
     if end == -1:
-        return {}, ["SKILL.md frontmatter has no closing --- delimiter."]
+        return {}, [f"{label} frontmatter has no closing --- delimiter."]
     raw = text[4:end]
     fields: dict[str, str] = {}
     for line in raw.splitlines():
         if not line.strip() or line.lstrip().startswith("#"):
             continue
         if line.startswith((" ", "\t")) or ":" not in line:
-            errors.append(f"Unexpected frontmatter syntax: {line[:80]}")
+            errors.append(f"Unexpected frontmatter syntax in {label}: {line[:80]}")
             continue
         key, value = line.split(":", 1)
         key = key.strip()
         value = value.strip().strip("\"'")
         if key in fields:
-            errors.append(f"Duplicate frontmatter field: {key}")
-        if key not in ALLOWED_FIELDS:
-            errors.append(f"Unsupported frontmatter field: {key}")
+            errors.append(f"Duplicate frontmatter field in {label}: {key}")
+        if key not in allowed_fields:
+            errors.append(f"Unsupported frontmatter field in {label}: {key}")
         fields[key] = value
     return fields, errors
 
@@ -243,10 +247,44 @@ def validate_plugin(root: Path) -> list[str]:
     return errors
 
 
+def validate_commands(root: Path) -> list[str]:
+    """Verify shortcut slash-command wrappers in commands/."""
+    errors: list[str] = []
+    commands_dir = root / "commands"
+    if not commands_dir.is_dir():
+        return ["Missing commands/ directory."]
+    for mode in COMMAND_MODES:
+        filename = f"tech-me-{mode}.md"
+        cmd_file = commands_dir / filename
+        label = f"commands/{filename}"
+        if not cmd_file.is_file():
+            errors.append(f"Missing command wrapper: {label}")
+            continue
+        text = cmd_file.read_text(encoding="utf-8")
+        fields, fm_errors = parse_simple_frontmatter(
+            text, allowed_fields=ALLOWED_COMMAND_FIELDS, label=label
+        )
+        errors.extend(fm_errors)
+        if not fields.get("description"):
+            errors.append(f"{label} required field description is empty or missing.")
+        if not fields.get("argument-hint"):
+            errors.append(f"{label} required field argument-hint is empty or missing.")
+        body = text.split("\n---\n", 1)[-1].strip() if "\n---\n" in text else ""
+        if not body:
+            errors.append(f"{label} instructions are missing.")
+            continue
+        if "tech-me" not in body or f"**`{mode}`**" not in body:
+            errors.append(f"{label} must delegate to tech-me in `{mode}` mode.")
+        if "$ARGUMENTS" not in body:
+            errors.append(f"{label} must include $ARGUMENTS placeholder.")
+    return errors
+
+
 def validate_repo(root: Path) -> list[str]:
     errors: list[str] = []
     errors.extend(validate_skill(root / "skills" / SKILL_NAME))
     errors.extend(validate_plugin(root))
+    errors.extend(validate_commands(root))
     scenarios_file = root / SCENARIOS_PATH
     scenario_errors = validate_scenarios(scenarios_file)
     errors.extend(scenario_errors)

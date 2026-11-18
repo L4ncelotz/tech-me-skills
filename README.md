@@ -1,7 +1,7 @@
 # Tech-Me
 
 [![Validate Tech-Me](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/badge/release-v0.1.1-blue)](https://github.com/L4ncelotz/tech-me-skills/releases)
+[![Release](https://img.shields.io/badge/release-v0.2.0-blue)](https://github.com/L4ncelotz/tech-me-skills/releases)
 [![Roadmap](https://img.shields.io/badge/roadmap-Phase%200.5%20%E2%86%92%20v1.0-blue)](ROADMAP.md)
 
 **Evidence-based technical architecture decisions, without the stack bias.**
@@ -77,7 +77,9 @@ On Claude Code, invoke the installed skill directly (or pass a mode):
 | **`adr`** | `/tech-me adr` | Drafts an Architecture Decision Record from the current decision |
 | **`help`** | `/tech-me help` (or bare `/tech-me`) | Shows the mode cheat-sheet and asks what you are deciding |
 
-For tools that surface `commands/` in their `/` menu (Claude Code plugins and [teveus](https://github.com/stawan15/teveus) when copied to `.teveus/commands` or `.claude/commands`), standalone shortcut aliases are also provided: `/tech-me-quick`, `/tech-me-review`, `/tech-me-migrate`, and `/tech-me-adr` (namespaced with `tech-me:` in Claude Code plugins).
+For tools that surface `commands/` in their `/` menu:
+- **Claude Code plugin install:** automatically registers `/tech-me:tech-me-quick`, `/tech-me:tech-me-review`, `/tech-me:tech-me-migrate`, and `/tech-me:tech-me-adr` alongside `/tech-me:tech-me`.
+- **`npx skills add` (Claude Code, [teveus](https://github.com/stawan15/teveus), Cursor, etc.):** installs `skills/tech-me/SKILL.md`, giving you `/tech-me [quick|review|migrate|adr|help]` immediately. If you also want standalone `/tech-me-quick`, `/tech-me-review`, `/tech-me-migrate`, and `/tech-me-adr` entries in the `/` menu of `teveus` or Claude Code, copy `commands/tech-me-*.md` into `~/.agents/commands/` (or `.teveus/commands/`, `.claude/commands/`).
 
 In any agent, you can also ask for Tech-Me by name with the same modes, for example:
 

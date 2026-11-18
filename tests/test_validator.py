@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from validate_repo import ROOT, SUMMARY_HEADING, validate_plugin, validate_repo, validate_results_claims, validate_scenarios, validate_skill  # noqa: E402
+from validate_repo import ROOT, SUMMARY_HEADING, validate_commands, validate_plugin, validate_repo, validate_results_claims, validate_scenarios, validate_skill  # noqa: E402
 
 
 class ValidationTests(unittest.TestCase):
@@ -175,6 +175,20 @@ class ValidationTests(unittest.TestCase):
             path = Path(directory) / "scenarios.json"
             path.write_text(json.dumps(fixture), encoding="utf-8")
             self.assertTrue(any("Missing mode fixtures: adr" in err for err in validate_scenarios(path)))
+
+    def test_rejects_missing_or_broken_command_wrapper(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cmds = root / "commands"
+            cmds.mkdir()
+            (cmds / "tech-me-quick.md").write_text(
+                "---\ndescription: Quick mode\n---\nMissing argument-hint and placeholder.\n",
+                encoding="utf-8",
+            )
+            errors = validate_commands(root)
+            self.assertTrue(any("Missing command wrapper: commands/tech-me-review.md" in err for err in errors))
+            self.assertTrue(any("argument-hint is empty or missing" in err for err in errors))
+            self.assertTrue(any("must include $ARGUMENTS" in err for err in errors))
 
 
 if __name__ == "__main__":

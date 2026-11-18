@@ -77,6 +77,8 @@ On Claude Code, invoke the installed skill directly (or pass a mode):
 | **`adr`** | `/tech-me adr` | Drafts an Architecture Decision Record from the current decision |
 | **`help`** | `/tech-me help` (or bare `/tech-me`) | Shows the mode cheat-sheet and asks what you are deciding |
 
+For tools that surface `commands/` in their `/` menu (Claude Code plugins and [teveus](https://github.com/stawan15/teveus) when copied to `.teveus/commands` or `.claude/commands`), standalone shortcut aliases are also provided: `/tech-me-quick`, `/tech-me-review`, `/tech-me-migrate`, and `/tech-me-adr` (namespaced with `tech-me:` in Claude Code plugins).
+
 In any agent, you can also ask for Tech-Me by name with the same modes, for example:
 
 ```text
@@ -170,6 +172,7 @@ tech-me/
 ├── .claude-plugin/
 │   ├── plugin.json              # Claude Code plugin manifest
 │   └── marketplace.json         # Single-plugin marketplace catalog
+├── commands/                    # Shortcut aliases (/tech-me-quick, review, migrate, adr)
 ├── .github/workflows/validate.yml
 ├── .gitattributes
 ├── .gitignore

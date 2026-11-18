@@ -1,7 +1,7 @@
 # Tech-Me
 
 [![Validate Tech-Me](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml)
-[![Pre-release](https://img.shields.io/badge/status-pre--release%20v0.1.1-orange)](https://github.com/L4ncelotz/tech-me-skills/releases)
+[![Release](https://img.shields.io/badge/release-v0.1.1-blue)](https://github.com/L4ncelotz/tech-me-skills/releases)
 [![Roadmap](https://img.shields.io/badge/roadmap-Phase%200.5%20%E2%86%92%20v1.0-blue)](ROADMAP.md)
 
 **Evidence-based technical architecture decisions, without the stack bias.**
@@ -54,11 +54,13 @@ For Claude Code (plugin marketplace, **not yet verified with `claude plugin vali
 /plugin install tech-me@tech-me-skills
 ```
 
-Claude Code namespaces plugin skills, so a plugin install is invoked as `/tech-me:tech-me`; a standalone `npx skills add` install is invoked as `/tech-me`.
+Claude Code namespaces plugin skills, so a plugin install is invoked as `/tech-me:tech-me`; a standalone `npx skills add` install is invoked as `/tech-me`. Pick **one** install method per agent so the skill is not duplicated.
 
 The skills CLI may prompt for an agent and install location. In Claude Code, an installed skill is also available as the `/tech-me` command. In other agents, automatic activation and command naming vary; ask for Tech-Me by name. Either way, the portable contract is the skill metadata and instructions, **not** a guaranteed slash command on every platform.
 
 ## Use
+
+Verify installation by running `/tech-me help` (or asking `"Use Tech-Me help"`) — you should get the 5-mode cheat-sheet.
 
 On Claude Code, invoke the installed skill directly (or pass a mode):
 

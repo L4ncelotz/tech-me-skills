@@ -23,7 +23,7 @@ Users may invoke Tech-Me with `/tech-me [mode]` or equivalent natural language:
 - **Default (`/tech-me <topic>`)**: Run the adaptive workflow below (1 high-impact question per turn, stop as soon as context is sufficient).
 - **Bare `/tech-me` or `/tech-me help`** (no topic provided): Reply with a compact 5-line cheat-sheet of the modes (`default`, `quick`, `review`, `migrate`, `adr`) and ask what they want to decide.
 - **`quick`** (`/tech-me quick ...`): **0 questions.** Skip discovery and recommend immediately. Mark every gap-filling default as an assumption with an observable revisit trigger, and label any unmeasured figure **estimate — not measured**. If a critical unknown makes a single answer unsafe, give a conditional recommendation instead of asking.
-- **`review`** (`/tech-me review ...`): Read-only review of the current project. Follow the **fast inspect order** (manifests & dependencies first → README & deployment/infra config → only targeted entrypoints/interfaces needed to verify a claim). Skip lockfiles, build artifacts, `node_modules`, and `.env`/secrets.
+- **`review`** (`/tech-me review ...`): Read-only review of the current project. Follow the **fast inspect order** (manifests & dependencies first → README, `ARCHITECTURE.md` / `docs/adr/` if present, and deployment/infra config → only targeted entrypoints/interfaces needed to verify a claim). Skip lockfiles, build artifacts, `node_modules`, and `.env`/secrets.
 - **`migrate`** (`/tech-me migrate ...`): Evaluate a proposed transition (e.g., `X -> Y`). Inspect current manifests/configs first if in a repo, then weigh migration cost, downtime, data backfill, rollback risk, and staged alternatives before recommending whether to proceed or stay put.
 - **`adr`** (`/tech-me adr ...`): Synthesize the agreed decision from the conversation or inspected context into a concise ADR using [ADR template](assets/adr-template.md). Draft in chat first; write a file only with explicit user permission.
 
@@ -95,3 +95,12 @@ Run this check in proportion to risk; surface significant findings, not a ritual
 - No invented citations, security certifications, compatibility guarantees, cost or performance figures.
 - No hidden tooling requirement: if web/codebase/terminal access is unavailable, continue with an honest limitation.
 - Be economical with the user's attention. **Ask only what changes a decision.**
+
+### Anti-rationalization guard
+
+| Temptation | Rule |
+| :--- | :--- |
+| "Asking 2–3 questions together saves turns." | **No.** One decision-changing question per turn (0 in `quick`). |
+| "This popular/familiar stack works fine here." | **No.** Filter hard constraints first; run the familiarity counterfactual. |
+| "I'll quote a rough RAM/latency/price number." | **No.** Label unmeasured numbers **estimate — not measured** or compare qualitatively. |
+| "The repo probably uses standard layout." | **No.** State only what you actually read, or mark it unknown. |

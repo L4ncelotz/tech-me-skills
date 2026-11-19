@@ -178,3 +178,56 @@ Measured directly from committed UTF-8 files (`est_tokens ≈ chars / 4`):
 - **Single agent harness:** Executed via Antigravity `run_workflow` subagents only. Cross-agent evaluation on Claude Code, Cursor, and `teveus` is still required before v1.0.
 - **LLM blind judge:** Scored by a separate blind `flash`-tier judge subagent rather than a human blind reviewer; treat scores as structured comparative evidence, not certification.
 - **Partial scenario coverage:** 5 of 21 scenarios were run (multi-turn `user_simulator` conversations and the remaining 16 scenarios were not executed in this batch).
+
+---
+
+## Full 21/21 Antigravity 3-Way Blinded Run — Remaining 16 Scenarios, Multi-Turn & `pro` Calibration (v0.3.0)
+
+**Date:** 2026-11-20  
+**Raw Run Artifact:** [`evals/runs/run_20261120_v030_remaining16_3way.json`](runs/run_20261120_v030_remaining16_3way.json)  
+**Harness:** Antigravity `run_workflow` (`n = 3` trials per condition, `blind_seed = 20261120`)  
+**Models:** Generator = `flash` (consistent with the first 5 scenarios) · `user_simulator` = `flash_lite` · Blind judge = `flash` (all 48 trial triplets) + `pro` calibration on 6 stratified trials
+
+### Combined 21/21 Macro Summary (normalized % of applicable `max_score`)
+
+| Condition | Macro Mean (% of `max_score`) | Total Critical Failures (across 63 trials) | Outright Scenario Wins (of 21) |
+| :--- | :---: | :---: | :---: |
+| **`tech-me`** | **97.3%** | 1 | **6 / 21** (11 ties) |
+| `baseline` | 92.6% | 2 | 3 / 21 |
+| `short-prompt` | 91.8% | **0** | 1 / 21 |
+
+### Remaining 16 Scenarios Breakdown (`n = 3` per condition)
+
+| Scenario ID | Type | Baseline Mean (%) | Short-Prompt Mean (%) | Tech-Me Mean (%) | Critical Failures |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| `short-answer-no-grill` | single-turn | 14.00 (100.0%) | 14.00 (100.0%) | 14.00 (100.0%) | 0 across all |
+| `conflicting-requirements` | single-turn | **14.00 (100.0%)** | 12.00 (85.7%) | 13.33 (95.3%) | 0 across all |
+| `migration-first-existing-project` | single-turn | **16.00 (100.0%)** | 15.33 (95.8%) | **16.00 (100.0%)** | 0 across all |
+| `unneeded-infrastructure` | single-turn | **14.00 (100.0%)** | 9.00 (76.8%) | 10.00 (85.7%) | 0 across all |
+| `growth-is-conditional` | single-turn | **14.00 (100.0%)** | 13.67 (97.6%) | **14.00 (100.0%)** | 0 across all |
+| `web-not-available` | single-turn | 11.67 (87.3%) | 12.33 (92.5%) | **13.33 (100.0%)** | 0 across all |
+| `higher-risk-data-choices` | single-turn | **14.00 (100.0%)** | 8.00 (57.1%) | 12.00 (85.7%) | 0 across all |
+| `language-adaptation` | single-turn | 5.33 (81.9%) | 6.00 (88.9%) | **6.67 (100.0%)** | 0 across all |
+| `permissioned-documentation` | single-turn | 10.00 (100.0%) | 10.00 (100.0%) | 10.00 (100.0%) | 0 across all |
+| `non-activation-routine-debug` | single-turn | **10.00 (100.0%)** | **10.00 (100.0%)** | 9.67 (96.7%) | 0 across all |
+| `mode-migrate-sqlite-postgres` | mode (`migrate`) | **16.00 (100.0%)** | 15.33 (95.8%) | **16.00 (100.0%)** | 0 across all |
+| `mode-adr-from-decision` | mode (`adr`) | 14.33 (89.6%) | **15.67 (97.9%)** | 14.67 (91.7%) | Baseline: 1 · Tech-Me: 1 (`Status: Accepted` without confirmation) |
+| `mode-help-menu` | mode (`help`) | 6.00 (100.0%) | 6.00 (100.0%) | 6.00 (100.0%) | 0 across all |
+| `fixture-multi-service-compose-review` | fixture (`review`) | 16.00 (100.0%) | 16.00 (100.0%) | 16.00 (100.0%) | 0 across all |
+| `discovery-internal-inventory` | multi-turn (`user_simulator`) | **15.33 (100.0%)** | **15.33 (100.0%)** | 15.00 (97.9%) | 0 across all |
+| `multi-turn-honor-stop-trigger` | multi-turn (`user_simulator`) | **15.33 (100.0%)** | **15.33 (100.0%)** | 15.00 (97.6%) | 0 across all |
+
+### `pro` vs `flash` Blind Judge Calibration (6 Stratified Trials, 18 Condition-Trials)
+
+To quantify `flash` judge reliability, 6 stratified trial triplets (trial 1 of `conflicting-requirements`, `migration-first-existing-project`, `mode-adr-from-decision`, `fixture-multi-service-compose-review`, `discovery-internal-inventory`, `multi-turn-honor-stop-trigger`) were re-scored blindly by `pro`:
+
+- **Mean absolute percentage difference (`pro` vs `flash`):** **`1.4 pp`** across 18 scored pairs (**14 of 18 pairs had `0.0 pp` difference**).
+- **Rank-order agreement:** **`6 / 6` trials** agreed on top-ranked condition(s).
+- **Notable divergence:** On `mode-adr-from-decision` trial 1, `flash` marked `Status: Accepted` without user confirmation as a rubric critical failure for both `baseline` and `tech-me`, whereas `pro` deducted score (`-8.1` to `-8.9 pp` vs `flash`) and noted the scenario failure signal without classifying it as a rubric critical failure.
+
+### Key Findings & Actionable Signal from 21/21 Coverage
+
+1. **`tech-me` leads overall (`97.3%` macro mean vs `92.6%` baseline, `91.8%` short-prompt)** and achieved `100%` on `language-adaptation`, `web-not-available`, `migration-first-existing-project`, `growth-is-conditional`, `mode-migrate-sqlite-postgres`, and all 3 fixture repos.
+2. **Real failure signal found in `adr` mode:** In 1 of 3 trials of `mode-adr-from-decision`, `tech-me` emitted `Status: Accepted` instead of `Proposed` without user confirmation. Tightening the `adr` mode guard in `SKILL.md` / `assets/adr-template.md` is a clear next improvement.
+3. **Single-turn discovery penalty:** On `unneeded-infrastructure` and `higher-risk-data-choices`, `tech-me` scored `85.7%` because it stopped after asking 1 discovery question in Turn 1, whereas `baseline` answered immediately (`100%`). Multi-turn `user_simulator` trials (`97.9%` / `97.6%`) confirmed that `tech-me` honors stop triggers and converges cleanly once discovery completes.
+4. **Remaining limitation:** All 21/21 runs were executed on the Antigravity harness; cross-agent evaluation (`teveus`, Claude Code, Cursor) is deferred to the future.

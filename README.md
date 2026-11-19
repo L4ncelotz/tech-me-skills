@@ -1,7 +1,7 @@
 # Tech-Me
 
 [![Validate Tech-Me](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/L4ncelotz/tech-me-skills/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/badge/release-v0.2.0-blue)](https://github.com/L4ncelotz/tech-me-skills/releases)
+[![Release](https://img.shields.io/badge/release-v0.3.0-blue)](https://github.com/L4ncelotz/tech-me-skills/releases)
 [![Roadmap](https://img.shields.io/badge/roadmap-Phase%200.5%20%E2%86%92%20v1.0-blue)](ROADMAP.md)
 
 **Evidence-based technical architecture decisions, without the stack bias.**

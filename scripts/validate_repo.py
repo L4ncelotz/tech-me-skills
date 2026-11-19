@@ -99,7 +99,7 @@ def validate_skill(skill_dir: Path) -> list[str]:
     return errors
 
 
-def validate_scenarios(path: Path) -> list[str]:
+def validate_scenarios(path: Path, root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     if not path.is_file():
         return [f"Missing evaluation scenarios: {path}"]
@@ -152,6 +152,25 @@ def validate_scenarios(path: Path) -> list[str]:
             turns = item["turns"]
             if not isinstance(turns, list) or not turns or any(not isinstance(t, str) or not t.strip() for t in turns):
                 errors.append(f"{label} turns must be a non-empty list of strings when present.")
+        if "fixture_dir" in item:
+            fdir = item["fixture_dir"]
+            if not isinstance(fdir, str) or not fdir.startswith("evals/fixtures/"):
+                errors.append(f"{label} fixture_dir must be a path under 'evals/fixtures/'.")
+            else:
+                fixtures_root = (root / "evals/fixtures").resolve()
+                resolved = (root / fdir).resolve()
+                if not resolved.is_relative_to(fixtures_root) or not resolved.is_dir():
+                    errors.append(f"{label} fixture_dir not found under evals/fixtures/: {fdir}")
+                else:
+                    if not (resolved / "README.md").is_file():
+                        errors.append(f"{label} fixture_dir missing README.md: {fdir}")
+                    if not (resolved / "env.trap.fixture").is_file():
+                        errors.append(f"{label} fixture_dir missing env.trap.fixture: {fdir}")
+                    if (resolved / ".env").exists():
+                        errors.append(f"{label} fixture_dir must not contain a committed .env file: {fdir}")
+                    manifests = ("package.json", "pyproject.toml", "docker-compose.yml", "go.mod", "Cargo.toml")
+                    if not any((resolved / m).is_file() for m in manifests):
+                        errors.append(f"{label} fixture_dir missing a manifest or compose file: {fdir}")
     missing = CATEGORIES - seen_categories
     if missing:
         errors.append(f"Missing evaluation categories: {', '.join(sorted(missing))}")
@@ -286,7 +305,7 @@ def validate_repo(root: Path) -> list[str]:
     errors.extend(validate_plugin(root))
     errors.extend(validate_commands(root))
     scenarios_file = root / SCENARIOS_PATH
-    scenario_errors = validate_scenarios(scenarios_file)
+    scenario_errors = validate_scenarios(scenarios_file, root=root)
     errors.extend(scenario_errors)
     if not scenario_errors:
         data = json.loads(scenarios_file.read_text(encoding="utf-8"))

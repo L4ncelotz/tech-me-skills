@@ -1,6 +1,6 @@
 {
   "name": "tech-me",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Evidence-based technical architecture advisor skill with adaptive discovery, fast codebase review, migration evaluation, and ADR drafting.",
   "author": {
     "name": "L4ncelotz"

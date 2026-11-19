@@ -60,6 +60,7 @@ def build_evaluation_payload(
     return {
         "scenario_id": scenario["id"],
         "category": scenario.get("category", "unknown"),
+        "fixture_dir": scenario.get("fixture_dir"),
         "predetermined_followups": scenario.get("turns", []),
         "baseline_prompt": {
             "system_prompt": BASELINE_SYSTEM_PROMPT,
@@ -181,6 +182,8 @@ def main() -> int:
             print(f"\n[DRY RUN] Scenario: {sc['id']} (Category: {sc.get('category')})")
             print(f"  Prompt: {sc['user_prompt']}")
             print(f"  Context: {sc.get('context', 'None')}")
+            if sc.get("fixture_dir"):
+                print(f"  Fixture dir: {sc['fixture_dir']}")
             print(f"  Expected behaviors: {len(sc.get('expected_behaviors', []))} rules")
             print(f"  Failure signals: {len(sc.get('failure_signals', []))} rules")
             print(f"  Scripted follow-up turns: {len(sc.get('turns', []))}")

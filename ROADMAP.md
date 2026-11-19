@@ -95,9 +95,9 @@
 - [x] 2.2 กำหนดพฤติกรรมที่คาดหวังของการอ่าน repo ใน `evals/scenarios.json` (`fixture_dir`, รวม 21 scenarios) และส่งออกใน `scripts/run_evals.py`
 - [x] 2.3 ตัวจำลองผู้ใช้สำหรับ multi-turn: เพิ่ม schema `user_simulator` (`persona`, `known_facts`, `unknowns`, `stop_rule`) ใน `scenarios.json`, validate ใน `validate_repo.py` และสร้าง `simulator_system_prompt` ใน `scripts/run_evals.py`
 - [x] 2.4 Baseline 3 แบบ: เพิ่ม `evals/short_prompt_baseline.md` และส่งออกครบ 3 เงื่อนไข (`baseline`, `short-prompt`, `tech-me`) พร้อมโหมด `--blind` ใน `scripts/run_evals.py` (ครอบคลุมทั้ง 21 scenarios)
-- [ ] 2.5 โปรโตคอลรัน: รัน 3-way `n=3` บน 5 scenarios (รวม 2 fixture repos) บน Antigravity harness แล้ว (`evals/runs/run_20261120_v030_3way.json`, 45 generator runs) · **ยังเหลือ:** รันข้ามอย่างน้อย 2 เอเจนต์อื่น (เช่น `teveus`, Claude Code, Cursor) และครบทุก fixture
-- [x] 2.6 การให้คะแนน: ทำ blind scoring (`A/B/C` แยก key) ด้วย judge subagent แยกต่างหาก รายงาน critical failures และ min–max variance ระหว่าง 3 รอบแล้ว *(หมายเหตุ: ใช้ LLM blind judge ยังไม่ใช่ human blind reviewer)*
-- [x] 2.7 อัปเดต `evals/RESULTS.md` แบบรายสถานการณ์พร้อมข้อจำกัดครบถ้วน (single-agent harness, LLM blind judge, 5/21 scenarios)
+- [x] 2.5 โปรโตคอลรัน: รัน 3-way `n=3` ครบทั้ง **21/21 scenarios** บน Antigravity harness แล้ว (`evals/runs/run_20261120_v030_3way.json` + `evals/runs/run_20261120_v030_remaining16_3way.json` รวม 189 generator runs, 2 multi-turn `user_simulator` scenarios, ครบทั้ง 3 fixture repos, และ `pro` calibration 6 trials) · **หมายเหตุ:** การรันข้าม agent ตัวอื่น (`teveus`, Claude Code, Cursor) พักไว้เป็นอนาคตตามการตัดสินใจของเจ้าของโปรเจกต์
+- [x] 2.6 การให้คะแนน: ทำ blind scoring (`A/B/C` แยก key) ด้วย judge subagent แยกต่างหาก รายงาน critical failures และ min–max variance ระหว่าง 3 รอบแล้ว *(หมายเหตุ: ใช้ LLM blind judge `flash` + `pro` calibration 6 trials ยังไม่ใช่ human blind reviewer)*
+- [x] 2.7 อัปเดต `evals/RESULTS.md` ครบทั้ง 21/21 สถานการณ์พร้อมข้อจำกัดครบถ้วน (single-agent Antigravity harness, LLM blind judge `flash` + `pro` calibration, cross-agent ไว้เป็นอนาคต)
 - [x] 2.8 วัดงบ token ของ `SKILL.md` (~3,166 est. tokens) เทียบ `short_prompt_baseline.md` (~110 est. tokens) และ `references/` 6 ไฟล์ (~483–1,025/ไฟล์) · ผลชี้ว่า `tech-me` ชนะ `short-prompt` ใน 4/5 สถานการณ์ (โดยเฉพาะ bias, migrate stay-put, quick) จึงคงโครงสร้าง `SKILL.md` เดิมไว้
 
 **เกณฑ์ผ่าน**: ผลเทียบ baseline ทั้งสองแบบทำซ้ำได้ในอย่างน้อย 2 เอเจนต์ · ไม่มี critical failure ในกรณีอ่าน repo · `RESULTS.md` ระบุข้อจำกัดครบ

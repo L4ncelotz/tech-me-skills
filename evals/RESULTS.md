@@ -129,3 +129,52 @@ Observed in the two spot-checked scenarios (transcripts in the JSON only, no add
 - An isolated adherence drift was noted: the familiarity counterfactual was applied with the intended cost-held-fixed reasoning, but the quoted phrasing did not use the v0.1.1 canonical wording verbatim. Future runs should re-check phrasing adherence.
 
 The baseline samples in the spot-check used a generic assistant framing and may not represent the published baseline capability of the main report.
+
+---
+
+## Phase 2 Evaluation: v0.3.0 3-Way Blind Run (2026-11-20)
+
+Full transcripts, blind scoring keys, per-trial scores, and token budget metadata are recorded in [`runs/run_20261120_v030_3way.json`](runs/run_20261120_v030_3way.json).
+
+- **Date:** 2026-11-20
+- **Harness:** Antigravity `run_workflow` (isolated read-only `research` subagents, no shared context across trials)
+- **Models:** Generator = `flash` tier · Blind judge = separate `flash` tier subagent per `(scenario, trial)` scoring anonymized `A / B / C` responses against [RUBRIC.md](RUBRIC.md) without access to the reveal key
+- **Conditions:** `baseline` (generic assistant) · `short-prompt` ([short_prompt_baseline.md](short_prompt_baseline.md), SHA-256 `e395d706b23cda95d69e1542e8fa15994fadd21f0b8b2d2839bc3ce3cf71fa78`) · `tech-me` ([SKILL.md](../skills/tech-me/SKILL.md), SHA-256 `ce460320815817ec6c5c5ccd66567511920855fabe15616910d6bdc7e6591643`)
+- **Sample size:** `n = 3` trials per condition across **5 of 21 scenarios** (45 generator runs + 15 blind judge runs), including 2 real fixture repositories (`evals/fixtures/tight-monolith` and `evals/fixtures/small-healthy-app`)
+
+### v0.3.0 3-Way Score Summary (mean and min–max across `n = 3`)
+
+| Scenario ID | Max Score | Baseline | Short-Prompt | Tech-Me | Critical Failures |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| `unknown-scale-defaults` | 14 | 8.33 (7–9) | 12.33 (11–13) | **13.00 (12–14)** | Baseline: 1 (invented vendor pricing tiers); Short-Prompt: 0; Tech-Me: 0 |
+| `historical-preference-bias` | 14–16 | 13.33 (12–15) | 12.67 (11–15) | **15.33 (14–16)** | 0 across all conditions |
+| `mode-quick-no-questions` | 14–16 | 11.33 (11–12) | 13.00 (12–14) | **14.67 (14–16)** | 0 across all conditions |
+| `mode-review-fast-inspect` (`tight-monolith`) | 16 | 12.00 (11–13) | **16.00 (16–16)** | **16.00 (16–16)** | 0 across all conditions (none read `env.trap.fixture`) |
+| `fixture-small-healthy-stay-put` (`small-healthy-app`) | 16 | 14.00 (13–15) | 13.00 (12–15) | **16.00 (16–16)** | 0 across all conditions |
+
+### Token & Context Budget (`v0.3.0`)
+
+Measured directly from committed UTF-8 files (`est_tokens ≈ chars / 4`):
+
+| File | Lines | Bytes | Words | Est. Tokens | Loaded When |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| `skills/tech-me/SKILL.md` | 107 | 12,698 | 1,716 | ~3,166 | On skill activation |
+| `evals/short_prompt_baseline.md` | 1 | 441 | 63 | ~110 | Baseline comparison only |
+| `skills/tech-me/references/discovery.md` | 48 | 3,401 | 507 | ~841 | On demand |
+| `skills/tech-me/references/evaluation.md` | 59 | 4,112 | 584 | ~1,025 | On demand |
+| `skills/tech-me/references/output.md` | 31 | 1,939 | 248 | ~483 | On demand |
+| `skills/tech-me/references/playbook-database.md` | 33 | 2,709 | 371 | ~677 | On demand |
+| `skills/tech-me/references/playbook-hosting.md` | 31 | 2,869 | 407 | ~715 | On demand |
+| `skills/tech-me/references/playbook-migration.md` | 37 | 2,652 | 373 | ~660 | On demand |
+| `skills/tech-me/assets/adr-template.md` | 36 | 870 | 127 | ~218 | On demand (`adr` mode) |
+
+### Decision from Evidence (Phase 2.8)
+
+- `tech-me` outperformed `baseline` in all 5 scenarios and outperformed `short-prompt` in 4 of 5 scenarios (tying at 16/16 on `mode-review-fast-inspect`), with **0 critical failures** across all 15 `tech-me` trials.
+- The largest margin over the ~110-token `short-prompt` appeared in **bias control** (`+2.66`), **stay-put migration restraint** (`+3.00`), and **strict `quick` mode** (`+1.67`). Keeping the full canonical bias check, migration ladder, and anti-rationalization guard in `SKILL.md` (~3,166 est. tokens) is justified by these results; references (~4,401 est. tokens combined) remain strictly on-demand.
+
+### Limitations of the 2026-11-20 Run
+
+- **Single agent harness:** Executed via Antigravity `run_workflow` subagents only. Cross-agent evaluation on Claude Code, Cursor, and `teveus` is still required before v1.0.
+- **LLM blind judge:** Scored by a separate blind `flash`-tier judge subagent rather than a human blind reviewer; treat scores as structured comparative evidence, not certification.
+- **Partial scenario coverage:** 5 of 21 scenarios were run (multi-turn `user_simulator` conversations and the remaining 16 scenarios were not executed in this batch).

@@ -9,6 +9,7 @@ All notable changes to this project should be documented here.
 - `evals/short_prompt_baseline.md`: concise 1-paragraph architecture-advisor prompt enabling 3-way evaluation (`baseline` vs `short-prompt` vs `tech-me`) across all 21 scenarios in `scripts/run_evals.py` (with SHA-256 tracking) and `evals/RUBRIC.md`.
 - `user_simulator` schema (`persona`, `known_facts`, `unknowns`, `stop_rule`) on multi-turn scenarios in `evals/scenarios.json`, validated by `scripts/validate_repo.py` and rendered into a deterministic `simulator_system_prompt` by `scripts/run_evals.py`.
 - `--blind` / `--blind-seed` mode in `scripts/run_evals.py --prepare-fixtures` to anonymize condition labels (`A`/`B`/`C`) and write the reveal mapping to a separate `.blind-key.json` file.
+- `evals/runs/run_20261120_v030_3way.json` and `evals/RESULTS.md` Phase 2 section: `n = 3` 3-way blinded evaluation (45 generator runs + 15 blind judge runs across 5 priority scenarios including 2 real fixture repos) plus `v0.3.0` token/context budget audit.
 
 ## [0.3.0] - 2026-11-19
 

@@ -95,10 +95,10 @@
 - [x] 2.2 กำหนดพฤติกรรมที่คาดหวังของการอ่าน repo ใน `evals/scenarios.json` (`fixture_dir`, รวม 21 scenarios) และส่งออกใน `scripts/run_evals.py`
 - [x] 2.3 ตัวจำลองผู้ใช้สำหรับ multi-turn: เพิ่ม schema `user_simulator` (`persona`, `known_facts`, `unknowns`, `stop_rule`) ใน `scenarios.json`, validate ใน `validate_repo.py` และสร้าง `simulator_system_prompt` ใน `scripts/run_evals.py`
 - [x] 2.4 Baseline 3 แบบ: เพิ่ม `evals/short_prompt_baseline.md` และส่งออกครบ 3 เงื่อนไข (`baseline`, `short-prompt`, `tech-me`) พร้อมโหมด `--blind` ใน `scripts/run_evals.py` (ครอบคลุมทั้ง 21 scenarios)
-- [ ] 2.5 โปรโตคอลรัน: ทุก fixture `n >= 3` ที่ `temperature > 0` (และรอบอ้างอิงที่ 0) ข้ามอย่างน้อย 2 เอเจนต์นอกจากตัวที่ใช้อยู่ (เช่น `teveus`, Claude Code, Cursor) บันทึกตาราง เอเจนต์ × fixture
-- [ ] 2.6 การให้คะแนน: ซ่อนป้ายเงื่อนไข ผู้ให้คะแนนต่างจากผู้สร้างคำตอบ รายงาน critical failures แยกจากค่าเฉลี่ย และรายงานความแปรปรวนระหว่างรอบ
-- [ ] 2.7 เขียน `evals/RESULTS.md` ใหม่แบบรายสถานการณ์ ไม่สรุปเกินหลักฐาน และอัปเดต `compatibility` ใน frontmatter ให้ตรงผลจริง
-- [ ] 2.8 ตัดสินใจจากผล: ถ้าพรอมต์สั้นสู้ได้ ให้ย่อ `SKILL.md` · วัดงบ token ของ `SKILL.md` และ `references/`
+- [ ] 2.5 โปรโตคอลรัน: รัน 3-way `n=3` บน 5 scenarios (รวม 2 fixture repos) บน Antigravity harness แล้ว (`evals/runs/run_20261120_v030_3way.json`, 45 generator runs) · **ยังเหลือ:** รันข้ามอย่างน้อย 2 เอเจนต์อื่น (เช่น `teveus`, Claude Code, Cursor) และครบทุก fixture
+- [x] 2.6 การให้คะแนน: ทำ blind scoring (`A/B/C` แยก key) ด้วย judge subagent แยกต่างหาก รายงาน critical failures และ min–max variance ระหว่าง 3 รอบแล้ว *(หมายเหตุ: ใช้ LLM blind judge ยังไม่ใช่ human blind reviewer)*
+- [x] 2.7 อัปเดต `evals/RESULTS.md` แบบรายสถานการณ์พร้อมข้อจำกัดครบถ้วน (single-agent harness, LLM blind judge, 5/21 scenarios)
+- [x] 2.8 วัดงบ token ของ `SKILL.md` (~3,166 est. tokens) เทียบ `short_prompt_baseline.md` (~110 est. tokens) และ `references/` 6 ไฟล์ (~483–1,025/ไฟล์) · ผลชี้ว่า `tech-me` ชนะ `short-prompt` ใน 4/5 สถานการณ์ (โดยเฉพาะ bias, migrate stay-put, quick) จึงคงโครงสร้าง `SKILL.md` เดิมไว้
 
 **เกณฑ์ผ่าน**: ผลเทียบ baseline ทั้งสองแบบทำซ้ำได้ในอย่างน้อย 2 เอเจนต์ · ไม่มี critical failure ในกรณีอ่าน repo · `RESULTS.md` ระบุข้อจำกัดครบ
 

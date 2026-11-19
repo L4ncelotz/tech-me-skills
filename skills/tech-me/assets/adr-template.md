@@ -1,6 +1,6 @@
 # ADR-NNN: <Decision title>
 
-- **Status:** Proposed | Accepted | Superseded
+- **Status:** Proposed (keep Proposed until the user explicitly confirms acceptance)
 - **Date:** YYYY-MM-DD (when known)
 - **Scope:** <affected system / modules>
 

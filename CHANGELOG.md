@@ -4,12 +4,22 @@ All notable changes to this project should be documented here.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-20
+
 ### Added
 
 - `evals/short_prompt_baseline.md`: concise 1-paragraph architecture-advisor prompt enabling 3-way evaluation (`baseline` vs `short-prompt` vs `tech-me`) across all 21 scenarios in `scripts/run_evals.py` (with SHA-256 tracking) and `evals/RUBRIC.md`.
 - `user_simulator` schema (`persona`, `known_facts`, `unknowns`, `stop_rule`) on multi-turn scenarios in `evals/scenarios.json`, validated by `scripts/validate_repo.py` and rendered into a deterministic `simulator_system_prompt` by `scripts/run_evals.py`.
 - `--blind` / `--blind-seed` mode in `scripts/run_evals.py --prepare-fixtures` to anonymize condition labels (`A`/`B`/`C`) and write the reveal mapping to a separate `.blind-key.json` file.
-- `evals/runs/run_20261120_v030_3way.json` and `evals/RESULTS.md` Phase 2 section: `n = 3` 3-way blinded evaluation (45 generator runs + 15 blind judge runs across 5 priority scenarios including 2 real fixture repos) plus `v0.3.0` token/context budget audit.
+- Full **21/21 Antigravity 3-way blinded evaluation** (`evals/runs/run_20261120_v030_3way.json` + `evals/runs/run_20261120_v030_remaining16_3way.json`, `n = 3` per condition, including 2 multi-turn `user_simulator` scenarios and all 3 fixture repos) plus `pro` blind judge calibration on 6 stratified trials (`1.4 pp` mean abs difference vs `flash`, `6/6` rank agreement).
+
+### Fixed
+
+- `skills/tech-me/SKILL.md` and `skills/tech-me/assets/adr-template.md`: enforced setting ADR `Status` to `Proposed` unless the user explicitly confirms acceptance or organizational sign-off. Verified via `n = 3` 3-way blinded regression run on `mode-adr-from-decision` (`tech-me`: `16.00/16`, `0` critical failures).
+
+### Changed
+
+- `ROADMAP.md`: marked Antigravity 21/21 evaluation and `v0.3.1` ADR fix complete, reordered Phase 3 (`3.2` feedback → `3.3` multi-language → `3.1` discovery), and explicitly deferred cross-agent verification (`teveus`, Claude Code, Cursor) to Future.
 
 ## [0.3.0] - 2026-11-19
 

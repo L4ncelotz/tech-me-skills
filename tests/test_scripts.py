@@ -136,6 +136,68 @@ class ScriptTests(unittest.TestCase):
             self.assertEqual(len(payload["predetermined_followups"]), 3)
             self.assertIn("recommend now", payload["predetermined_followups"][-1])
 
+    def test_run_evals_exports_three_way_and_simulator(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_file = Path(tmp_dir) / "fixtures.json"
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "run_evals.py"),
+                    "--prepare-fixtures",
+                    "--scenarios",
+                    "multi-turn-honor-stop-trigger",
+                    "--output",
+                    str(out_file),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            data = json.loads(out_file.read_text(encoding="utf-8"))
+            self.assertEqual(len(data["short_baseline_prompt_sha256"]), 64)
+            payload = data["fixtures"]["multi-turn-honor-stop-trigger"]
+            self.assertIn("baseline_prompt", payload)
+            self.assertIn("short_baseline_prompt", payload)
+            self.assertIn("skill_prompt", payload)
+            self.assertIsInstance(payload["user_simulator"], dict)
+            self.assertIn("Known facts", payload["simulator_system_prompt"])
+
+    def test_run_evals_blind_mode_separates_key(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_file = Path(tmp_dir) / "blind.json"
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "run_evals.py"),
+                    "--prepare-fixtures",
+                    "--blind",
+                    "--blind-seed",
+                    "42",
+                    "--scenarios",
+                    "historical-preference-bias",
+                    "--output",
+                    str(out_file),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            key_file = Path(tmp_dir) / "blind.blind-key.json"
+            self.assertTrue(out_file.is_file())
+            self.assertTrue(key_file.is_file())
+            data = json.loads(out_file.read_text(encoding="utf-8"))
+            self.assertTrue(data["blinded"])
+            payload = data["fixtures"]["historical-preference-bias"]
+            self.assertNotIn("baseline_prompt", payload)
+            self.assertNotIn("short_baseline_prompt", payload)
+            self.assertNotIn("skill_prompt", payload)
+            self.assertEqual(set(payload["conditions"].keys()), {"A", "B", "C"})
+            key_data = json.loads(key_file.read_text(encoding="utf-8"))
+            self.assertEqual(
+                set(key_data["keys"]["historical-preference-bias"].values()),
+                {"baseline", "short-prompt", "tech-me"},
+            )
+
     def test_pack_release_rejects_missing_git(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             out_dir = Path(tmp_dir) / "dist"

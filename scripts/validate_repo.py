@@ -171,6 +171,20 @@ def validate_scenarios(path: Path, root: Path = ROOT) -> list[str]:
                     manifests = ("package.json", "pyproject.toml", "docker-compose.yml", "go.mod", "Cargo.toml")
                     if not any((resolved / m).is_file() for m in manifests):
                         errors.append(f"{label} fixture_dir missing a manifest or compose file: {fdir}")
+        if "user_simulator" in item:
+            sim = item["user_simulator"]
+            if not isinstance(sim, dict):
+                errors.append(f"{label} user_simulator must be an object when present.")
+            else:
+                for field in ("persona", "stop_rule"):
+                    if not isinstance(sim.get(field), str) or not sim[field].strip():
+                        errors.append(f"{label} user_simulator.{field} must be a non-empty string.")
+                facts = sim.get("known_facts")
+                if not isinstance(facts, list) or not facts or any(not isinstance(v, str) or not v.strip() for v in facts):
+                    errors.append(f"{label} user_simulator.known_facts must be a non-empty list of strings.")
+                unknowns = sim.get("unknowns")
+                if not isinstance(unknowns, list) or any(not isinstance(v, str) or not v.strip() for v in unknowns):
+                    errors.append(f"{label} user_simulator.unknowns must be a list of non-empty strings.")
     missing = CATEGORIES - seen_categories
     if missing:
         errors.append(f"Missing evaluation categories: {', '.join(sorted(missing))}")
@@ -317,10 +331,13 @@ def validate_repo(root: Path) -> list[str]:
         errors.extend(validate_results_claims(root / RESULTS_PATH, ids))
     for filename in (
         "README.md", "LICENSE", "CONTRIBUTING.md", "CHANGELOG.md", RESULTS_PATH,
-        "evals/RUBRIC.md", "evals/RUNBOOK.md"
+        "evals/RUBRIC.md", "evals/RUNBOOK.md", "evals/short_prompt_baseline.md",
     ):
         if not (root / filename).is_file():
             errors.append(f"Missing repository document: {filename}")
+    short_baseline = root / "evals/short_prompt_baseline.md"
+    if short_baseline.is_file() and not short_baseline.read_text(encoding="utf-8").strip():
+        errors.append("evals/short_prompt_baseline.md must not be empty.")
     return errors
 
 

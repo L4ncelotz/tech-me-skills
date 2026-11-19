@@ -4,6 +4,12 @@ All notable changes to this project should be documented here.
 
 ## [Unreleased]
 
+### Added
+
+- `evals/short_prompt_baseline.md`: concise 1-paragraph architecture-advisor prompt enabling 3-way evaluation (`baseline` vs `short-prompt` vs `tech-me`) across all 21 scenarios in `scripts/run_evals.py` (with SHA-256 tracking) and `evals/RUBRIC.md`.
+- `user_simulator` schema (`persona`, `known_facts`, `unknowns`, `stop_rule`) on multi-turn scenarios in `evals/scenarios.json`, validated by `scripts/validate_repo.py` and rendered into a deterministic `simulator_system_prompt` by `scripts/run_evals.py`.
+- `--blind` / `--blind-seed` mode in `scripts/run_evals.py --prepare-fixtures` to anonymize condition labels (`A`/`B`/`C`) and write the reveal mapping to a separate `.blind-key.json` file.
+
 ## [0.3.0] - 2026-11-19
 
 ### Added

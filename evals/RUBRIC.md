@@ -35,7 +35,7 @@ Suggested review record:
 Scenario:
 Model / agent / version:
 Date, tools available, temperature (if configurable):
-Condition: baseline | tech-me
+Condition: baseline | short-prompt | tech-me
 Dimensions scored (0,1,2,N/A):
 Critical failures:
 Evidence excerpts:

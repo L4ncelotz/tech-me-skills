@@ -93,8 +93,8 @@
 
 - [x] 2.1 สร้าง fixture repo จริงใน `evals/fixtures/` 3 แบบ: `tight-monolith`, `multi-service-compose`, `small-healthy-app` พร้อมไฟล์กับดัก `env.trap.fixture` (ปลอดภัยต่อ `.gitignore` และ `pack_release.py`) และเพิ่มการตรวจใน `validate_repo.py`
 - [x] 2.2 กำหนดพฤติกรรมที่คาดหวังของการอ่าน repo ใน `evals/scenarios.json` (`fixture_dir`, รวม 21 scenarios) และส่งออกใน `scripts/run_evals.py`
-- [ ] 2.3 ตัวจำลองผู้ใช้สำหรับ multi-turn: persona และข้อเท็จจริงที่กำหนดไว้ ตอบเฉพาะสิ่งที่ถูกถาม และส่งสัญญาณ “recommend now” ตามเงื่อนไข
-- [ ] 2.4 Baseline 3 แบบ: ไม่มี skill, พรอมต์สั้นหนึ่งย่อหน้าที่เขียนเอง, skill เต็ม (ครอบคลุมทั้ง 19 scenarios รวมถึง 5 โหมดใหม่)
+- [x] 2.3 ตัวจำลองผู้ใช้สำหรับ multi-turn: เพิ่ม schema `user_simulator` (`persona`, `known_facts`, `unknowns`, `stop_rule`) ใน `scenarios.json`, validate ใน `validate_repo.py` และสร้าง `simulator_system_prompt` ใน `scripts/run_evals.py`
+- [x] 2.4 Baseline 3 แบบ: เพิ่ม `evals/short_prompt_baseline.md` และส่งออกครบ 3 เงื่อนไข (`baseline`, `short-prompt`, `tech-me`) พร้อมโหมด `--blind` ใน `scripts/run_evals.py` (ครอบคลุมทั้ง 21 scenarios)
 - [ ] 2.5 โปรโตคอลรัน: ทุก fixture `n >= 3` ที่ `temperature > 0` (และรอบอ้างอิงที่ 0) ข้ามอย่างน้อย 2 เอเจนต์นอกจากตัวที่ใช้อยู่ (เช่น `teveus`, Claude Code, Cursor) บันทึกตาราง เอเจนต์ × fixture
 - [ ] 2.6 การให้คะแนน: ซ่อนป้ายเงื่อนไข ผู้ให้คะแนนต่างจากผู้สร้างคำตอบ รายงาน critical failures แยกจากค่าเฉลี่ย และรายงานความแปรปรวนระหว่างรอบ
 - [ ] 2.7 เขียน `evals/RESULTS.md` ใหม่แบบรายสถานการณ์ ไม่สรุปเกินหลักฐาน และอัปเดต `compatibility` ใน frontmatter ให้ตรงผลจริง

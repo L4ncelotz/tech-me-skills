@@ -204,6 +204,18 @@ class ValidationTests(unittest.TestCase):
             path.write_text(json.dumps(fixture), encoding="utf-8")
             self.assertTrue(any("must be a path under 'evals/fixtures/'" in err for err in validate_scenarios(path)))
 
+    def test_rejects_malformed_user_simulator(self):
+        fixture = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
+        fixture["scenarios"][0]["user_simulator"] = {"persona": "", "known_facts": [], "unknowns": "bad", "stop_rule": ""}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "scenarios.json"
+            path.write_text(json.dumps(fixture), encoding="utf-8")
+            errors = validate_scenarios(path)
+            self.assertTrue(any("user_simulator.persona" in err for err in errors))
+            self.assertTrue(any("user_simulator.known_facts" in err for err in errors))
+            self.assertTrue(any("user_simulator.unknowns" in err for err in errors))
+            self.assertTrue(any("user_simulator.stop_rule" in err for err in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -15,7 +15,17 @@
       "failure_signals": [
         "Dumps a long fixed questionnaire.",
         "Recommends a familiar stack without learning decision-driving constraints."
-      ]
+      ],
+      "user_simulator": {
+        "persona": "Operations manager at a 25-person company, non-developer, wants a practical internal tool.",
+        "known_facts": [
+          "Only internal employees (~20 people) will use it; no public customers.",
+          "The company already runs a Windows Server and an Oracle database that IT requires using.",
+          "One part-time developer maintains internal apps."
+        ],
+        "unknowns": ["Exact peak requests per second", "Long-term 5-year growth"],
+        "stop_rule": "Reveal only facts that answer the assistant's question; say you do not know for unknowns; send 'recommend now' once all known_facts are shared or on turn 3."
+      }
     },
     {
       "id": "short-answer-no-grill",
@@ -218,7 +228,17 @@
         "Internal only. About 12 warehouse staff use it in one building, plus me.",
         "It must run on a Raspberry Pi we already have, and it must keep working when the internet is down.",
         "Charts by hour, plus a live temperature alarm. That is everything I know - recommend now."
-      ]
+      ],
+      "user_simulator": {
+        "persona": "Warehouse operations lead, practical and time-constrained, non-expert in cloud infrastructure.",
+        "known_facts": [
+          "Internal only; about 12 warehouse staff in one building plus the user.",
+          "Must run on an existing Raspberry Pi and keep working when the internet is down.",
+          "Needs hourly charts and a live temperature alarm."
+        ],
+        "unknowns": ["Exact future sensor count", "Exact hardware budget"],
+        "stop_rule": "Reveal only facts that answer the assistant's question; say you do not know for unknowns; reply with 'recommend now' once all known_facts are shared or on turn 3."
+      }
     },
     {
       "id": "mode-quick-no-questions",

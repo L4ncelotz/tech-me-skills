@@ -85,7 +85,7 @@ Run this check in proportion to risk; surface significant findings, not a ritual
 ### 6. Document: optional and permissioned
 
 - If asked, create a compact architecture summary or Architecture Decision Records (ADRs) for meaningful decisions. Prefer one summary for small projects; add ADRs only for consequential, revisitable choices.
-- Draft in chat first unless the user explicitly authorizes file creation. Use the [ADR template](assets/adr-template.md). Record rationale, rejected alternatives, assumptions, and revisit triggers.
+- Draft in chat first unless the user explicitly authorizes file creation. Use the [ADR template](assets/adr-template.md). Always set ADR `Status` to **Proposed** unless the user explicitly confirms acceptance or organizational sign-off. Record rationale, rejected alternatives, assumptions, and revisit triggers.
 - On a later review, reuse existing decisions but re-evaluate changed constraints rather than blindly carrying forward historical choices.
 
 ## Non-negotiables

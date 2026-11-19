@@ -231,3 +231,17 @@ To quantify `flash` judge reliability, 6 stratified trial triplets (trial 1 of `
 2. **Real failure signal found in `adr` mode:** In 1 of 3 trials of `mode-adr-from-decision`, `tech-me` emitted `Status: Accepted` instead of `Proposed` without user confirmation. Tightening the `adr` mode guard in `SKILL.md` / `assets/adr-template.md` is a clear next improvement.
 3. **Single-turn discovery penalty:** On `unneeded-infrastructure` and `higher-risk-data-choices`, `tech-me` scored `85.7%` because it stopped after asking 1 discovery question in Turn 1, whereas `baseline` answered immediately (`100%`). Multi-turn `user_simulator` trials (`97.9%` / `97.6%`) confirmed that `tech-me` honors stop triggers and converges cleanly once discovery completes.
 4. **Remaining limitation:** All 21/21 runs were executed on the Antigravity harness; cross-agent evaluation (`teveus`, Claude Code, Cursor) is deferred to the future.
+
+---
+
+## Regression Check — `v0.3.1` (`mode-adr-from-decision` Fix)
+
+**Date:** 2026-11-20  
+**Change:** Enforced `Status: Proposed` (until user explicitly confirms acceptance) in `skills/tech-me/SKILL.md` and `skills/tech-me/assets/adr-template.md`.  
+**Setup:** `n = 3` 3-way blinded (`blind_seed = 20261121`), Antigravity `run_workflow`, `flash` generator + `flash` blind judge.
+
+| Condition | Trial 1 | Trial 2 | Trial 3 | Mean (%) | Critical Failures |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`tech-me` (`v0.3.1`)** | **16 / 16** | **16 / 16** | **16 / 16** | **16.00 (100.0%)** | **0** |
+| `short-prompt` | 15 / 16 | 15 / 16 | 16 / 16 | 15.33 (95.8%) | 0 |
+| `baseline` | 15 / 16 | 15 / 16 | 16 / 16 | 15.33 (95.8%) | 0 |

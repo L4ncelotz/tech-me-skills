@@ -1,6 +1,6 @@
 # Tech-Me Roadmap
 
-สถานะ ณ 18 พ.ย. 2026 · เวอร์ชันปัจจุบัน v0.2.0 (GitHub Latest release, tag `48c7a5d`; cross-agent evals ยังไม่ครบ v1.0) · เอกสารนี้เป็นข้อเสนอเพื่อวางแผน ไม่ใช่คำมั่นสัญญา ขนาดงานเป็นการประมาณคร่าว ๆ (S = ไม่เกิน 1 วัน, M = 1-3 วัน, L = มากกว่า 3 วัน)
+สถานะ ณ 19 พ.ย. 2026 · เวอร์ชันปัจจุบัน v0.3.0 (GitHub Latest release; cross-agent evals ยังไม่ครบ v1.0) · เอกสารนี้เป็นข้อเสนอเพื่อวางแผน ไม่ใช่คำมั่นสัญญา ขนาดงานเป็นการประมาณคร่าว ๆ (S = ไม่เกิน 1 วัน, M = 1-3 วัน, L = มากกว่า 3 วัน)
 
 ## 1. หลักการจัดลำดับ
 
@@ -80,8 +80,8 @@
 
 - [x] 1.1 Domain Playbooks ใน `skills/tech-me/references/` (โหลดเมื่อจำเป็น ไม่ใส่ราคา/เลขเวอร์ชันที่เน่าเร็ว): Database/Storage (`playbook-database.md`), Hosting/Compute (`playbook-hosting.md`), และ Boundary/Migration (`playbook-migration.md`)
 - [x] 1.2 เพิ่ม `--skill-zip` ใน `pack_release.py` ให้ได้ `tech-me-skill-<ver>.zip` ที่รากเป็นโฟลเดอร์ `tech-me/` สำหรับอัปโหลดบน claude.ai พร้อม unit tests (3 tests) และคู่มือใน `PUBLISHING.md`
-- [ ] 1.3 รัน `claude plugin validate .` และทดสอบติดตั้งจริงผ่าน `/plugin marketplace add L4ncelotz/tech-me-skills` ยืนยันชื่อคำสั่ง (`/tech-me:tech-me` และ `/tech-me:tech-me-*`)
-- [ ] 1.4 Dogfood: ใช้ทุกโหมด (`default`, `quick`, `review`, `migrate`, `adr`, `help`) กับโปรเจกต์จริงบน `teveus`, Claude Code, และ Antigravity อย่างน้อยโหมดละ 1 ครั้ง และบันทึกจุดที่พลาด
+- [ ] 1.3 รัน `claude plugin validate .` และทดสอบติดตั้งจริงผ่าน `/plugin marketplace add L4ncelotz/tech-me-skills` ยืนยันชื่อคำสั่ง (`/tech-me:tech-me` และ `/tech-me:tech-me-*`) รวมถึงทดสอบอัปโหลด `tech-me-skill-0.3.0.zip` บน `claude.ai`
+- [x] 1.4 Dogfood: ทดสอบโหมด `review`, `migrate`, `quick`, `help` ผ่าน read-only subagent บน fixture repos จริง (`tight-monolith`, `small-healthy-app`) และแก้จุดฝืด 3 จุดแล้ว *(ยังเหลือ interactive dogfood บน `teveus` และ Claude Code)*
 
 **เกณฑ์ผ่าน**: Playbook ไม่มีตัวเลขที่ตรวจสอบไม่ได้ · plugin และ zip ติดตั้งใช้งานได้จริง · README ตรงกับชื่อคำสั่งที่ทดสอบจริง
 
@@ -91,8 +91,8 @@
 
 **งาน**
 
-- [ ] 2.1 สร้าง fixture repo จริงใน `evals/fixtures/` อย่างน้อย 3 แบบ: (ก) monolith ที่โมดูลผูกกันแน่น (ข) repo ที่มี `docker-compose` และหลาย service (ค) repo เล็กที่ไม่ควรแนะนำให้ย้ายระบบ พร้อมไฟล์กับดักความลับ (ตั้งชื่อให้ไม่ติด denylist ของ `pack_release.py` หรือ exclude ใน release)
-- [ ] 2.2 กำหนดพฤติกรรมที่คาดหวังของการอ่าน repo: ดู manifest, compose, เอกสาร, interfaces เท่าที่เกี่ยวข้อง · รายงานว่าอ่านไฟล์ไหน · ไม่อ้างว่า inspect สิ่งที่ไม่ได้เปิด · อ่านอย่างเดียว
+- [x] 2.1 สร้าง fixture repo จริงใน `evals/fixtures/` 3 แบบ: `tight-monolith`, `multi-service-compose`, `small-healthy-app` พร้อมไฟล์กับดัก `env.trap.fixture` (ปลอดภัยต่อ `.gitignore` และ `pack_release.py`) และเพิ่มการตรวจใน `validate_repo.py`
+- [x] 2.2 กำหนดพฤติกรรมที่คาดหวังของการอ่าน repo ใน `evals/scenarios.json` (`fixture_dir`, รวม 21 scenarios) และส่งออกใน `scripts/run_evals.py`
 - [ ] 2.3 ตัวจำลองผู้ใช้สำหรับ multi-turn: persona และข้อเท็จจริงที่กำหนดไว้ ตอบเฉพาะสิ่งที่ถูกถาม และส่งสัญญาณ “recommend now” ตามเงื่อนไข
 - [ ] 2.4 Baseline 3 แบบ: ไม่มี skill, พรอมต์สั้นหนึ่งย่อหน้าที่เขียนเอง, skill เต็ม (ครอบคลุมทั้ง 19 scenarios รวมถึง 5 โหมดใหม่)
 - [ ] 2.5 โปรโตคอลรัน: ทุก fixture `n >= 3` ที่ `temperature > 0` (และรอบอ้างอิงที่ 0) ข้ามอย่างน้อย 2 เอเจนต์นอกจากตัวที่ใช้อยู่ (เช่น `teveus`, Claude Code, Cursor) บันทึกตาราง เอเจนต์ × fixture

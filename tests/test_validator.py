@@ -190,6 +190,20 @@ class ValidationTests(unittest.TestCase):
             self.assertTrue(any("argument-hint is empty or missing" in err for err in errors))
             self.assertTrue(any("must include $ARGUMENTS" in err for err in errors))
 
+    def test_rejects_invalid_or_missing_fixture_dir(self):
+        fixture = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
+        fixture["scenarios"][0]["fixture_dir"] = "evals/fixtures/does-not-exist"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "scenarios.json"
+            path.write_text(json.dumps(fixture), encoding="utf-8")
+            self.assertTrue(any("fixture_dir not found" in err for err in validate_scenarios(path)))
+
+        fixture["scenarios"][0]["fixture_dir"] = "../skills/tech-me"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "scenarios.json"
+            path.write_text(json.dumps(fixture), encoding="utf-8")
+            self.assertTrue(any("must be a path under 'evals/fixtures/'" in err for err in validate_scenarios(path)))
+
 
 if __name__ == "__main__":
     unittest.main()

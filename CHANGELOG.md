@@ -4,10 +4,24 @@ All notable changes to this project should be documented here.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-19
+
 ### Added
 
 - Domain Playbooks under `skills/tech-me/references/` (`playbook-database.md`, `playbook-hosting.md`, `playbook-migration.md`), linked from `skills/tech-me/SKILL.md` for on-demand loading without volatile pricing or version numbers.
-- `--skill-zip` flag in `scripts/pack_release.py` to build standalone `tech-me-skill-<ver>.zip` archives rooted at `tech-me/` (`SKILL.md`, `references/`, `assets/`, rejecting `README.md` at skill root) for `claude.ai` uploads, covered by 3 new unit tests in `tests/test_scripts.py` and documented in `PUBLISHING.md` and `README.md`.
+- `--skill-zip` flag in `scripts/pack_release.py` to build standalone `tech-me-skill-<ver>.zip` archives rooted at `tech-me/` (`SKILL.md`, `references/`, `assets/`, rejecting `README.md` at skill root) for `claude.ai` uploads, covered by 3 unit tests in `tests/test_scripts.py` and documented in `PUBLISHING.md` and `README.md`.
+- Real fixture repositories under `evals/fixtures/` (`tight-monolith`, `multi-service-compose`, `small-healthy-app`) with `pack_release.py`-safe secret traps (`env.trap.fixture`), linked to `evals/scenarios.json` (`fixture_dir`, 19 → 21 scenarios) and exported by `scripts/run_evals.py`.
+- `fixture_dir` structural checks in `scripts/validate_repo.py` and `tests/test_validator.py` (47 unit tests total).
+
+### Changed
+
+- `skills/tech-me/SKILL.md`: sharpened `review` and `migrate` fast inspect order to list non-ignored paths first and explicitly exclude secret/env patterns (`.env*`, `env.*`, `*secret*`, `*credential*`) based on read-only dogfooding against the new fixture repos.
+- `evals/RESULTS.md`: updated scenario coverage line to `3 of 21 fixture scenarios` (with historical note).
+
+### Limitations
+
+- `.claude-plugin/` has not yet been verified with `claude plugin validate .` or a live Claude Code marketplace install (Phase 1.3).
+- Dogfooding was performed via an isolated read-only subagent against `evals/fixtures/tight-monolith`, `evals/fixtures/small-healthy-app`, `quick`, and `help` modes; formal `n >= 3` multi-agent blind scoring against all 21 scenarios remains in Phase 2 (`v0.4.0`).
 
 ## [0.2.0] - 2026-11-18
 

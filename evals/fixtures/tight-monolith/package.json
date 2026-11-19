@@ -1,0 +1,16 @@
+{
+  "name": "fixture-tight-monolith",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.0",
+    "@prisma/client": "^5.18.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
